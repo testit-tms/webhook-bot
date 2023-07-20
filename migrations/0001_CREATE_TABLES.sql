@@ -20,7 +20,9 @@ CREATE TABLE IF NOT EXISTS chats (
     telegram_name varchar (250) NOT NULL,
     CONSTRAINT fk_company FOREIGN KEY(company_id) REFERENCES companies(id)
 );
+CREATE INDEX index_chat ON chats (company_id);
 -- +goose Down
+DROP INDEX index_chat;
 DROP TABLE chats;
 DROP INDEX index_token;
 DROP TABLE companies;

@@ -1,4 +1,4 @@
-package postgres
+package database
 
 import (
 	"database/sql"
@@ -9,8 +9,8 @@ import (
 )
 
 type Fixture struct {
-	mock sqlmock.Sqlmock
-	db   *sqlx.DB
+	Mock sqlmock.Sqlmock
+	DB   *sqlx.DB
 	con  *sql.DB
 }
 
@@ -19,7 +19,7 @@ func NewFixture(t *testing.T) *Fixture {
 
 	db := sqlx.NewDb(mockDB, "sqlmock")
 
-	return &Fixture{mock: mock, db: db, con: mockDB}
+	return &Fixture{Mock: mock, DB: db, con: mockDB}
 }
 
 func (f *Fixture) Teardown() {
