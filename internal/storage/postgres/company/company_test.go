@@ -2,6 +2,7 @@ package company
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"regexp"
 	"testing"
@@ -9,6 +10,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/testit-tms/webhook-bot/internal/entities"
+	"github.com/testit-tms/webhook-bot/internal/storage"
 	"github.com/testit-tms/webhook-bot/pkg/database"
 )
 
@@ -69,5 +71,90 @@ func TestCompanyStorage_AddCompany(t *testing.T) {
 		// Assert
 		assert.ErrorIs(t, err, expectErr)
 		assert.Equal(t, entities.Company{}, chat)
+	})
+}
+
+func TestCompanyStorage_GetCompaniesByOwnerId(t *testing.T) {
+	t.Run("with companies", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		var id int64 = 21
+		companiesExp := []entities.Company{
+			{
+				Id:      12,
+				OwnerId: id,
+				Name:    "MyCompany",
+				Email:   "info@ya.ru",
+				Token:   "23r32r23",
+			},
+			{
+				Id:      13,
+				OwnerId: id,
+				Name:    "AnyCompany",
+				Email:   "info@ya.ru",
+				Token:   "rwe23t23t",
+			},
+		}
+
+		rows := sqlmock.NewRows([]string{"id", "token", "owner_id", "name", "email"}).
+			AddRow("12", "23r32r23", "21", "MyCompany", "info@ya.ru").
+			AddRow("13", "rwe23t23t", "21", "AnyCompany", "info@ya.ru")
+
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, token, owner_id, name, email FROM companies WHERE owner_id = $1")).
+			WithArgs(id).
+			WillReturnRows(rows)
+		repo := New(f.DB)
+
+		// Act
+		companies, err := repo.GetCompaniesByOwnerId(context.Background(), id)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, companiesExp, companies)
+	})
+
+	t.Run("without companies", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		var id int64 = 21
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, token, owner_id, name, email FROM companies WHERE owner_id = $1")).
+			WithArgs(id).
+			WillReturnError(sql.ErrNoRows)
+		repo := New(f.DB)
+
+		// Act
+		companies, err := repo.GetCompaniesByOwnerId(context.Background(), id)
+
+		// Assert
+		assert.ErrorIs(t, err, storage.ErrNotFound)
+		assert.Equal(t, []entities.Company{}, companies)
+	})
+
+	t.Run("with error", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		expectErr := errors.New("test error")
+
+		var id int64 = 21
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, token, owner_id, name, email FROM companies WHERE owner_id = $1")).
+			WithArgs(id).
+			WillReturnError(expectErr)
+		repo := New(f.DB)
+
+		// Act
+		companies, err := repo.GetCompaniesByOwnerId(context.Background(), id)
+
+		// Assert
+		assert.Error(t, expectErr, err)
+		assert.Equal(t, []entities.Company{}, companies)
 	})
 }

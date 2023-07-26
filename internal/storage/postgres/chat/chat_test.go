@@ -21,7 +21,7 @@ func TestChatStorage_GetChatsByCompanyId(t *testing.T) {
 		f := database.NewFixture(t)
 		defer f.Teardown()
 
-		id := 21
+		var id int64 = 21
 		chatsExp := []entities.Chat{
 			{
 				Id:           12,
@@ -60,7 +60,7 @@ func TestChatStorage_GetChatsByCompanyId(t *testing.T) {
 		f := database.NewFixture(t)
 		defer f.Teardown()
 
-		id := 12
+		var id int64 = 21
 		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, company_id, telegram_id, telegram_name FROM chats WHERE company_id=$1")).
 			WithArgs(id).
 			WillReturnError(sql.ErrNoRows)
@@ -82,7 +82,7 @@ func TestChatStorage_GetChatsByCompanyId(t *testing.T) {
 
 		expectErr := errors.New("test error")
 
-		id := 12
+		var id int64 = 21
 		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, company_id, telegram_id, telegram_name FROM chats WHERE company_id=$1")).
 			WithArgs(id).
 			WillReturnError(expectErr)

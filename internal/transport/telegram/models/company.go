@@ -8,8 +8,8 @@ type Company struct {
 	Email       string `validate:"email"`
 }
 
-func (c Company) ToCompanyInfo() entities.CompanyInfo {
-	return entities.CompanyInfo{
+func (c Company) ToCompanyInfo() entities.CompanyRegistrationInfo {
+	return entities.CompanyRegistrationInfo{
 		Name:  c.CompanyName,
 		Email: c.Email,
 		Owner: entities.OwnerInfo{

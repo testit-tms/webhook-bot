@@ -2,10 +2,13 @@ package company
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/testit-tms/webhook-bot/internal/entities"
+	"github.com/testit-tms/webhook-bot/internal/storage"
 )
 
 type CompanyStorage struct {
@@ -19,7 +22,8 @@ func New(db *sqlx.DB) *CompanyStorage {
 }
 
 const (
-	addCompany = "INSERT INTO companies (token, owner_id, name, email) VALUES ($1, $2, $3, $4) RETURNING id, token, owner_id, name, email"
+	addCompany          = "INSERT INTO companies (token, owner_id, name, email) VALUES ($1, $2, $3, $4) RETURNING id, token, owner_id, name, email"
+	getCompanyByOwnerId = "SELECT id, token, owner_id, name, email FROM companies WHERE owner_id = $1"
 )
 
 func (s *CompanyStorage) AddCompany(ctx context.Context, company entities.Company) (entities.Company, error) {
@@ -33,4 +37,21 @@ func (s *CompanyStorage) AddCompany(ctx context.Context, company entities.Compan
 	}
 
 	return newCompany, nil
+}
+
+func (s *CompanyStorage) GetCompaniesByOwnerId(ctx context.Context, ownerId int64) ([]entities.Company, error) {
+	const op = "storage.postgres.GetCompanyByOwnerId"
+
+	companies := []entities.Company{}
+
+	err := s.db.SelectContext(ctx, &companies, getCompanyByOwnerId, ownerId)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return companies, storage.ErrNotFound
+		}
+
+		return companies, fmt.Errorf("%s: execute query: %w", op, err)
+	}
+
+	return companies, nil
 }

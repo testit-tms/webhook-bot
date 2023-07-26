@@ -31,7 +31,7 @@ func New(os ownerStorage, cs companyStorage) *RegistrationUsecases {
 }
 
 // TODO: add transaction
-func (r *RegistrationUsecases) RegisterCompany(ctx context.Context, c entities.CompanyInfo) error {
+func (r *RegistrationUsecases) RegisterCompany(ctx context.Context, c entities.CompanyRegistrationInfo) error {
 	const op = "RegistrationUsecases.RegisterCompany"
 
 	owner, err := r.os.GetOwnerByTelegramId(ctx, c.Owner.TelegramId)

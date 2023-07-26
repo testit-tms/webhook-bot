@@ -28,7 +28,7 @@ const (
 	deleteChatByCompanyId = "DELETE FROM chats WHERE company_id=$1"
 )
 
-func (s *ChatStorage) GetChatsByCompanyId(ctx context.Context, id int) ([]entities.Chat, error) {
+func (s *ChatStorage) GetChatsByCompanyId(ctx context.Context, id int64) ([]entities.Chat, error) {
 	const op = "storage.postgres.GetChatByCompanyId"
 
 	chats := []entities.Chat{}

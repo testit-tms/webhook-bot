@@ -28,7 +28,7 @@ const (
 	deleteOwnerById      = "DELETE FROM owners WHERE id=$1"
 )
 
-func (s *OwnerStorage) GetOwnerById(ctx context.Context, id int) (entities.Owner, error) {
+func (s *OwnerStorage) GetOwnerById(ctx context.Context, id int64) (entities.Owner, error) {
 	const op = "storage.postgres.GetOwnerById"
 
 	owner := entities.Owner{}
@@ -73,7 +73,7 @@ func (r *OwnerStorage) AddOwner(ctx context.Context, owner entities.Owner) (enti
 	return newOwner, nil
 }
 
-func (r *OwnerStorage) DeleteOwnerById(ctx context.Context, id int) error {
+func (r *OwnerStorage) DeleteOwnerById(ctx context.Context, id int64) error {
 	const op = "storage.postgres.DeleteOwnerById"
 
 	_, err := r.db.ExecContext(ctx, deleteOwnerById, id)

@@ -13,7 +13,7 @@ import (
 )
 
 type regUsecase interface {
-	RegisterCompany(ctx context.Context, c entities.CompanyInfo) error
+	RegisterCompany(ctx context.Context, c entities.CompanyRegistrationInfo) error
 }
 
 type Registrator struct {
