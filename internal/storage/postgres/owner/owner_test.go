@@ -9,6 +9,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
+	"github.com/testit-tms/webhook-bot/internal/entities"
 	"github.com/testit-tms/webhook-bot/internal/storage"
 	"github.com/testit-tms/webhook-bot/pkg/database"
 )
@@ -21,9 +22,9 @@ func TestOwnerStorage_GetOwnerById(t *testing.T) {
 		defer f.Teardown()
 
 		id := 12
-		ownerExp := storage.Owner{
+		ownerExp := entities.Owner{
 			Id:           id,
-			TelegramId:   "123456",
+			TelegramId:   123456,
 			TelegramName: "Mega Owner",
 		}
 
@@ -60,7 +61,7 @@ func TestOwnerStorage_GetOwnerById(t *testing.T) {
 
 		// Assert
 		assert.ErrorIs(t, err, storage.ErrNotFound)
-		assert.Equal(t, storage.Owner{}, owner)
+		assert.Equal(t, entities.Owner{}, owner)
 	})
 
 	t.Run("with error", func(t *testing.T) {
@@ -82,7 +83,80 @@ func TestOwnerStorage_GetOwnerById(t *testing.T) {
 
 		// Assert
 		assert.ErrorIs(t, err, expectErr)
-		assert.Equal(t, storage.Owner{}, owner)
+		assert.Equal(t, entities.Owner{}, owner)
+	})
+}
+
+func TestOwnerStorage_GetOwnerByTelegramId(t *testing.T) {
+	t.Run("with owner", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		var id int64 = 123456
+		ownerExp := entities.Owner{
+			Id:           12,
+			TelegramId:   id,
+			TelegramName: "Mega Owner",
+		}
+
+		rows := sqlmock.NewRows([]string{"id", "telegram_id", "telegram_name"}).
+			AddRow("12", "123456", "Mega Owner")
+
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, telegram_id, telegram_name FROM owners WHERE telegram_id=$1")).
+			WithArgs(id).
+			WillReturnRows(rows)
+		repo := New(f.DB)
+
+		// Act
+		owner, err := repo.GetOwnerByTelegramId(context.Background(), id)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.Equal(t, ownerExp, owner)
+	})
+
+	t.Run("without owner", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		var id int64 = 123456
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, telegram_id, telegram_name FROM owners WHERE telegram_id=$1")).
+			WithArgs(id).
+			WillReturnError(sql.ErrNoRows)
+		repo := New(f.DB)
+
+		// Act
+		owner, err := repo.GetOwnerByTelegramId(context.Background(), id)
+
+		// Assert
+		assert.ErrorIs(t, err, storage.ErrNotFound)
+		assert.Equal(t, entities.Owner{}, owner)
+	})
+
+	t.Run("with error", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		expectErr := errors.New("test error")
+
+		var id int64 = 123456
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, telegram_id, telegram_name FROM owners WHERE telegram_id=$1")).
+			WithArgs(id).
+			WillReturnError(expectErr)
+		repo := New(f.DB)
+
+		// Act
+		owner, err := repo.GetOwnerByTelegramId(context.Background(), id)
+
+		// Assert
+		assert.ErrorIs(t, err, expectErr)
+		assert.Equal(t, entities.Owner{}, owner)
 	})
 }
 
@@ -92,9 +166,9 @@ func TestOwnerStorage_AddOwner(t *testing.T) {
 		t.Parallel()
 		f := database.NewFixture(t)
 		defer f.Teardown()
-		expectedOwner := storage.Owner{
+		expectedOwner := entities.Owner{
 			Id:           12,
-			TelegramId:   "123456",
+			TelegramId:   123456,
 			TelegramName: "MyName",
 		}
 		rows := sqlmock.NewRows([]string{"id", "telegram_id", "telegram_name"}).
@@ -121,9 +195,9 @@ func TestOwnerStorage_AddOwner(t *testing.T) {
 		defer f.Teardown()
 
 		expectErr := errors.New("test error")
-		expectedOwner := storage.Owner{
+		expectedOwner := entities.Owner{
 			Id:           12,
-			TelegramId:   "123456",
+			TelegramId:   123456,
 			TelegramName: "MyName",
 		}
 
@@ -138,7 +212,7 @@ func TestOwnerStorage_AddOwner(t *testing.T) {
 
 		// Assert
 		assert.ErrorIs(t, err, expectErr)
-		assert.Equal(t, storage.Owner{}, owner)
+		assert.Equal(t, entities.Owner{}, owner)
 	})
 }
 

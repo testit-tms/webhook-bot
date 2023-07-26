@@ -1,7 +1,7 @@
 -- +goose Up
 CREATE TABLE IF NOT EXISTS owners (
     id SERIAL PRIMARY KEY NOT NULL,
-    telegram_id varchar (50) NOT NULL,
+    telegram_id INT NOT NULL,
     telegram_name varchar (250) NOT NULL
 );
 CREATE TABLE IF NOT EXISTS companies (
@@ -16,7 +16,7 @@ CREATE INDEX index_token ON companies (token);
 CREATE TABLE IF NOT EXISTS chats (
     id SERIAL PRIMARY KEY NOT NULL,
     company_id INT NOT NULL,
-    telegram_id varchar (50) NOT NULL,
+    telegram_id INT NOT NULL,
     telegram_name varchar (250) NOT NULL,
     CONSTRAINT fk_company FOREIGN KEY(company_id) REFERENCES companies(id)
 );

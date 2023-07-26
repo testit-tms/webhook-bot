@@ -9,6 +9,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
+	"github.com/testit-tms/webhook-bot/internal/entities"
 	"github.com/testit-tms/webhook-bot/internal/storage"
 	"github.com/testit-tms/webhook-bot/pkg/database"
 )
@@ -21,17 +22,17 @@ func TestChatStorage_GetChatsByCompanyId(t *testing.T) {
 		defer f.Teardown()
 
 		id := 21
-		chatsExp := []storage.Chat{
+		chatsExp := []entities.Chat{
 			{
 				Id:           12,
 				CompanyId:    id,
-				TelegramId:   "123456",
+				TelegramId:   123456,
 				TelegramName: "MyChat",
 			},
 			{
 				Id:           13,
 				CompanyId:    id,
-				TelegramId:   "654321",
+				TelegramId:   654321,
 				TelegramName: "AnyChat",
 			},
 		}
@@ -70,7 +71,7 @@ func TestChatStorage_GetChatsByCompanyId(t *testing.T) {
 
 		// Assert
 		assert.ErrorIs(t, err, storage.ErrNotFound)
-		assert.Equal(t, []storage.Chat{}, chats)
+		assert.Equal(t, []entities.Chat{}, chats)
 	})
 
 	t.Run("with error", func(t *testing.T) {
@@ -92,7 +93,7 @@ func TestChatStorage_GetChatsByCompanyId(t *testing.T) {
 
 		// Assert
 		assert.Error(t, expectErr, err)
-		assert.Equal(t, []storage.Chat{}, chats)
+		assert.Equal(t, []entities.Chat{}, chats)
 	})
 }
 
@@ -102,10 +103,10 @@ func TestChatStorage_AddChat(t *testing.T) {
 		t.Parallel()
 		f := database.NewFixture(t)
 		defer f.Teardown()
-		expectedChat := storage.Chat{
+		expectedChat := entities.Chat{
 			Id:           12,
 			CompanyId:    21,
-			TelegramId:   "123456",
+			TelegramId:   123456,
 			TelegramName: "MyChat",
 		}
 		rows := sqlmock.NewRows([]string{"id", "company_id", "telegram_id", "telegram_name"}).
@@ -132,10 +133,10 @@ func TestChatStorage_AddChat(t *testing.T) {
 		defer f.Teardown()
 
 		expectErr := errors.New("test error")
-		expectedChat := storage.Chat{
+		expectedChat := entities.Chat{
 			Id:           12,
 			CompanyId:    21,
-			TelegramId:   "123456",
+			TelegramId:   123456,
 			TelegramName: "MyChat",
 		}
 
@@ -150,7 +151,7 @@ func TestChatStorage_AddChat(t *testing.T) {
 
 		// Assert
 		assert.ErrorIs(t, err, expectErr)
-		assert.Equal(t, storage.Chat{}, chat)
+		assert.Equal(t, entities.Chat{}, chat)
 	})
 }
 

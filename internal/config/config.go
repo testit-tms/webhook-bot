@@ -9,8 +9,10 @@ import (
 )
 
 type Config struct {
-	HTTPServer `yaml:"http_server"`
-	Database   `yaml:"database"`
+	HTTPServer  `yaml:"http_server"`
+	Database    `yaml:"database"`
+	TelegramBot `yaml:"telegram_bot"`
+	LogLevel    string `yaml:"log_level" env-default:"Info"`
 }
 
 type HTTPServer struct {
@@ -21,10 +23,14 @@ type HTTPServer struct {
 
 type Database struct {
 	Host     string `yaml:"host" env-default:"localhost"`
-	Port     int    `yaml:"port" env-default:"5432"`
+	Port     int64  `yaml:"port" env-default:"5432"`
 	DBName   string `yaml:"db_name" env-default:"bot"`
 	User     string `yaml:"user" env-default:"postgres"`
 	Password string `yaml:"password" env-required:"true" env:"DB_PASSWORD"`
+}
+
+type TelegramBot struct {
+	Token string `yaml:"token"  env-required:"true" env:"BOT_TOKEN"`
 }
 
 func MustLoad() *Config {

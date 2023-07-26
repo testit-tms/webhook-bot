@@ -8,7 +8,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
-	"github.com/testit-tms/webhook-bot/internal/storage"
+	"github.com/testit-tms/webhook-bot/internal/entities"
 	"github.com/testit-tms/webhook-bot/pkg/database"
 )
 
@@ -18,7 +18,7 @@ func TestCompanyStorage_AddCompany(t *testing.T) {
 		t.Parallel()
 		f := database.NewFixture(t)
 		defer f.Teardown()
-		expectedCompany := storage.Company{
+		expectedCompany := entities.Company{
 			Id:      12,
 			Token:   "bguFFFTF&ffdR9*9u",
 			OwnerId: 21,
@@ -49,7 +49,7 @@ func TestCompanyStorage_AddCompany(t *testing.T) {
 		defer f.Teardown()
 
 		expectErr := errors.New("test error")
-		expectedCompany := storage.Company{
+		expectedCompany := entities.Company{
 			Id:      12,
 			Token:   "bguFFFTF&ffdR9*9u",
 			OwnerId: 21,
@@ -68,6 +68,6 @@ func TestCompanyStorage_AddCompany(t *testing.T) {
 
 		// Assert
 		assert.ErrorIs(t, err, expectErr)
-		assert.Equal(t, storage.Company{}, chat)
+		assert.Equal(t, entities.Company{}, chat)
 	})
 }

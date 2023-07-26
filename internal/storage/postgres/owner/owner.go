@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/testit-tms/webhook-bot/internal/entities"
 	"github.com/testit-tms/webhook-bot/internal/storage"
 )
 
@@ -21,15 +22,16 @@ func New(db *sqlx.DB) *OwnerStorage {
 }
 
 const (
-	getOwnerById    = "SELECT id, telegram_id, telegram_name FROM owners WHERE id=$1"
-	addOwner        = "INSERT INTO owners (telegram_id, telegram_name) VALUES ($1, $2) RETURNING id, telegram_id, telegram_name"
-	deleteOwnerById = "DELETE FROM owners WHERE id=$1"
+	getOwnerById         = "SELECT id, telegram_id, telegram_name FROM owners WHERE id=$1"
+	getOwnerByTelegramId = "SELECT id, telegram_id, telegram_name FROM owners WHERE telegram_id=$1"
+	addOwner             = "INSERT INTO owners (telegram_id, telegram_name) VALUES ($1, $2) RETURNING id, telegram_id, telegram_name"
+	deleteOwnerById      = "DELETE FROM owners WHERE id=$1"
 )
 
-func (s *OwnerStorage) GetOwnerById(ctx context.Context, id int) (storage.Owner, error) {
+func (s *OwnerStorage) GetOwnerById(ctx context.Context, id int) (entities.Owner, error) {
 	const op = "storage.postgres.GetOwnerById"
 
-	owner := storage.Owner{}
+	owner := entities.Owner{}
 
 	if err := s.db.GetContext(ctx, &owner, getOwnerById, id); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -42,10 +44,26 @@ func (s *OwnerStorage) GetOwnerById(ctx context.Context, id int) (storage.Owner,
 	return owner, nil
 }
 
-func (r *OwnerStorage) AddOwner(ctx context.Context, owner storage.Owner) (storage.Owner, error) {
+func (s *OwnerStorage) GetOwnerByTelegramId(ctx context.Context, id int64) (entities.Owner, error) {
+	const op = "storage.postgres.GetOwnerByTelegramId"
+
+	owner := entities.Owner{}
+
+	if err := s.db.GetContext(ctx, &owner, getOwnerByTelegramId, id); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return owner, storage.ErrNotFound
+		}
+
+		return owner, fmt.Errorf("%s: execute query: %w", op, err)
+	}
+
+	return owner, nil
+}
+
+func (r *OwnerStorage) AddOwner(ctx context.Context, owner entities.Owner) (entities.Owner, error) {
 	const op = "storage.postgres.AddOwner"
 
-	newOwner := storage.Owner{}
+	newOwner := entities.Owner{}
 
 	err := r.db.QueryRowxContext(ctx, addOwner, owner.TelegramId, owner.TelegramName).StructScan(&newOwner)
 	if err != nil {

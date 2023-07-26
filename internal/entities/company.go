@@ -1,4 +1,4 @@
-package storage
+package entities
 
 type Company struct {
 	Id      int    `db:"id"`
@@ -6,4 +6,10 @@ type Company struct {
 	Token   string `db:"token"`
 	Name    string `db:"name"`
 	Email   string `db:"email"`
+}
+
+type CompanyInfo struct {
+	Name  string
+	Email string
+	Owner OwnerInfo
 }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/testit-tms/webhook-bot/internal/entities"
 	"github.com/testit-tms/webhook-bot/internal/storage"
 )
 
@@ -27,10 +28,10 @@ const (
 	deleteChatByCompanyId = "DELETE FROM chats WHERE company_id=$1"
 )
 
-func (s *ChatStorage) GetChatsByCompanyId(ctx context.Context, id int) ([]storage.Chat, error) {
+func (s *ChatStorage) GetChatsByCompanyId(ctx context.Context, id int) ([]entities.Chat, error) {
 	const op = "storage.postgres.GetChatByCompanyId"
 
-	chats := []storage.Chat{}
+	chats := []entities.Chat{}
 
 	if err := s.db.SelectContext(ctx, &chats, getChatsByCompanyId, id); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -43,10 +44,10 @@ func (s *ChatStorage) GetChatsByCompanyId(ctx context.Context, id int) ([]storag
 	return chats, nil
 }
 
-func (r *ChatStorage) AddChat(ctx context.Context, chat storage.Chat) (storage.Chat, error) {
+func (r *ChatStorage) AddChat(ctx context.Context, chat entities.Chat) (entities.Chat, error) {
 	const op = "storage.postgres.AddChat"
 
-	newChat := storage.Chat{}
+	newChat := entities.Chat{}
 
 	err := r.db.QueryRowxContext(ctx, addChat, chat.CompanyId, chat.TelegramId, chat.TelegramName).StructScan(&newChat)
 	if err != nil {
