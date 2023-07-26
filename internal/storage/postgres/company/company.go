@@ -23,7 +23,7 @@ func New(db *sqlx.DB) *CompanyStorage {
 
 const (
 	addCompany          = "INSERT INTO companies (token, owner_id, name, email) VALUES ($1, $2, $3, $4) RETURNING id, token, owner_id, name, email"
-	getCompanyByOwnerId = "SELECT id, token, owner_id, name, email FROM companies WHERE owner_id = $1"
+	getCompanyByOwnerId = "SELECT name, email FROM companies AS c INNER JOIN owners As o ON o.id = c.owner_id WHERE o.telegram_id=$1"
 )
 
 func (s *CompanyStorage) AddCompany(ctx context.Context, company entities.Company) (entities.Company, error) {
@@ -39,6 +39,7 @@ func (s *CompanyStorage) AddCompany(ctx context.Context, company entities.Compan
 	return newCompany, nil
 }
 
+// TODO: rename to GetCompanyByOwnerTelegramId
 func (s *CompanyStorage) GetCompaniesByOwnerId(ctx context.Context, ownerId int64) ([]entities.Company, error) {
 	const op = "storage.postgres.GetCompanyByOwnerId"
 

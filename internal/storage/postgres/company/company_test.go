@@ -103,7 +103,7 @@ func TestCompanyStorage_GetCompaniesByOwnerId(t *testing.T) {
 			AddRow("12", "23r32r23", "21", "MyCompany", "info@ya.ru").
 			AddRow("13", "rwe23t23t", "21", "AnyCompany", "info@ya.ru")
 
-		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, token, owner_id, name, email FROM companies WHERE owner_id = $1")).
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT name, email FROM companies AS c INNER JOIN owners As o ON o.id = c.owner_id WHERE o.telegram_id=$1")).
 			WithArgs(id).
 			WillReturnRows(rows)
 		repo := New(f.DB)
@@ -123,7 +123,7 @@ func TestCompanyStorage_GetCompaniesByOwnerId(t *testing.T) {
 		defer f.Teardown()
 
 		var id int64 = 21
-		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, token, owner_id, name, email FROM companies WHERE owner_id = $1")).
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT name, email FROM companies AS c INNER JOIN owners As o ON o.id = c.owner_id WHERE o.telegram_id=$1")).
 			WithArgs(id).
 			WillReturnError(sql.ErrNoRows)
 		repo := New(f.DB)
@@ -145,7 +145,7 @@ func TestCompanyStorage_GetCompaniesByOwnerId(t *testing.T) {
 		expectErr := errors.New("test error")
 
 		var id int64 = 21
-		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, token, owner_id, name, email FROM companies WHERE owner_id = $1")).
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT name, email FROM companies AS c INNER JOIN owners As o ON o.id = c.owner_id WHERE o.telegram_id=$1")).
 			WithArgs(id).
 			WillReturnError(expectErr)
 		repo := New(f.DB)

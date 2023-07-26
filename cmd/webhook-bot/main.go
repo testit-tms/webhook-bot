@@ -11,6 +11,7 @@ import (
 	"github.com/testit-tms/webhook-bot/internal/storage/postgres/owner"
 	"github.com/testit-tms/webhook-bot/internal/transport/telegram"
 	"github.com/testit-tms/webhook-bot/internal/transport/telegram/commands"
+	"github.com/testit-tms/webhook-bot/internal/usecases"
 	"github.com/testit-tms/webhook-bot/internal/usecases/registration"
 	"github.com/testit-tms/webhook-bot/pkg/database"
 	"github.com/testit-tms/webhook-bot/pkg/logger"
@@ -37,7 +38,11 @@ func main() {
 
 	regUsecases := registration.New(ownerStorage, companyStorage)
 	registrator := commands.NewRegistrator(logger, regUsecases)
-	bot, err := telegram.New(logger, cfg.TelegramBot.Token, registrator)
+
+	companyUsesaces := usecases.NewCompanyUsecases(companyStorage)
+	companyCommands := commands.NewCompanyCommands(companyUsesaces)
+
+	bot, err := telegram.New(logger, cfg.TelegramBot.Token, registrator, companyCommands)
 	if err != nil {
 		logger.Error("cannot create telegram bot", err)
 	}

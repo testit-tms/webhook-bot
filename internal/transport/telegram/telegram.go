@@ -13,6 +13,7 @@ import (
 const (
 	rigesterCommand = "register"
 	getChatID       = "get_chat_id"
+	getMyCompanies  = "get_my_companies"
 )
 
 type registrator interface {
@@ -20,15 +21,20 @@ type registrator interface {
 	GetFirstMessage(chatID int64) tgbotapi.MessageConfig
 }
 
+type companyCommands interface {
+	GetMyCompanies(m *tgbotapi.Message) (tgbotapi.MessageConfig, error)
+}
+
 type TelegramBot struct {
 	logger           *slog.Logger
 	bot              *tgbotapi.BotAPI
 	waitConversation map[int64]Conversation
 	registrator      registrator
+	cc               companyCommands
 }
 
 // New creates a new TelegramBot instance
-func New(logger *slog.Logger, token string, r registrator) (*TelegramBot, error) {
+func New(logger *slog.Logger, token string, r registrator, cc companyCommands) (*TelegramBot, error) {
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		return nil, err
@@ -39,6 +45,7 @@ func New(logger *slog.Logger, token string, r registrator) (*TelegramBot, error)
 			bot:              bot,
 			waitConversation: make(map[int64]Conversation),
 			registrator:      r,
+			cc:               cc,
 		},
 		nil
 }
@@ -87,7 +94,14 @@ func (b *TelegramBot) Run() {
 				step:               1,
 			}
 		case getChatID:
-			msg = commands.GetChatId(b.logger, update.Message)
+			msg = commands.GetChatId(update.Message)
+		case getMyCompanies:
+			msg, err := b.cc.GetMyCompanies(update.Message)
+			if err != nil {
+				b.logger.Error("cannot get companies", sl.Err(err))
+			}
+			b.sendMessage(msg)
+			continue
 		default:
 			msg.Text = "I don't know that command"
 		}
