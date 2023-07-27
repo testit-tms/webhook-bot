@@ -2,6 +2,7 @@ package registration
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/testit-tms/webhook-bot/internal/entities"
@@ -16,8 +17,17 @@ type ownerStorage interface {
 
 type companyStorage interface {
 	AddCompany(ctx context.Context, company entities.Company) (entities.Company, error)
+	GetCompanyByOwnerTelegramId(ctx context.Context, ownerId int64) (entities.Company, error)
 }
 
+type chatsStorage interface {
+}
+
+var (
+	ErrCompanyAlreadyExists = fmt.Errorf("company already exists")
+)
+
+// TODO: move to usesases package and write tests
 type RegistrationUsecases struct {
 	os ownerStorage
 	cs companyStorage
@@ -51,17 +61,25 @@ func (r *RegistrationUsecases) RegisterCompany(ctx context.Context, c entities.C
 		}
 	}
 
-	company := entities.Company{
-		Name:    c.Name,
-		Email:   c.Email,
-		OwnerId: owner.Id,
-		Token:   random.NewRandomString(30),
-	}
-
-	_, err = r.cs.AddCompany(ctx, company)
+	_, err = r.cs.GetCompanyByOwnerTelegramId(ctx, c.Owner.TelegramId)
 	if err != nil {
-		return fmt.Errorf("%s: cannot add company: %w", op, err)
+		if errors.Is(err, storage.ErrNotFound) {
+			company := entities.Company{
+				Name:    c.Name,
+				Email:   c.Email,
+				OwnerId: owner.Id,
+				Token:   random.NewRandomString(30),
+			}
+
+			_, err = r.cs.AddCompany(ctx, company)
+			if err != nil {
+				return fmt.Errorf("%s: cannot add company: %w", op, err)
+			}
+			return nil
+		}
+
+		return fmt.Errorf("%s: get company by owner id: %w", op, err)
 	}
 
-	return nil
+	return ErrCompanyAlreadyExists
 }

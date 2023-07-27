@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS chats (
     id SERIAL PRIMARY KEY NOT NULL,
     company_id INT NOT NULL,
     telegram_id INT NOT NULL,
-    telegram_name varchar (250) NOT NULL,
     CONSTRAINT fk_company FOREIGN KEY(company_id) REFERENCES companies(id)
 );
 CREATE INDEX index_chat ON chats (company_id);

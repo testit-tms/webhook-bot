@@ -74,66 +74,56 @@ func TestCompanyStorage_AddCompany(t *testing.T) {
 	})
 }
 
-func TestCompanyStorage_GetCompaniesByOwnerId(t *testing.T) {
-	t.Run("with companies", func(t *testing.T) {
+func TestCompanyStorage_GetCompanyByOwnerTelegramId(t *testing.T) {
+	t.Run("with company", func(t *testing.T) {
 		// Arrange
 		t.Parallel()
 		f := database.NewFixture(t)
 		defer f.Teardown()
 
 		var id int64 = 21
-		companiesExp := []entities.Company{
-			{
-				Id:      12,
-				OwnerId: id,
-				Name:    "MyCompany",
-				Email:   "info@ya.ru",
-				Token:   "23r32r23",
-			},
-			{
-				Id:      13,
-				OwnerId: id,
-				Name:    "AnyCompany",
-				Email:   "info@ya.ru",
-				Token:   "rwe23t23t",
-			},
+		companyExp := entities.Company{
+			Id:      12,
+			OwnerId: 13,
+			Token:   "bguFFFTF&ffdR9*9u",
+			Name:    "MyCompany",
+			Email:   "info@ya.ru",
 		}
 
 		rows := sqlmock.NewRows([]string{"id", "token", "owner_id", "name", "email"}).
-			AddRow("12", "23r32r23", "21", "MyCompany", "info@ya.ru").
-			AddRow("13", "rwe23t23t", "21", "AnyCompany", "info@ya.ru")
+			AddRow(12, "bguFFFTF&ffdR9*9u", 13, "MyCompany", "info@ya.ru")
 
-		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT name, email FROM companies AS c INNER JOIN owners As o ON o.id = c.owner_id WHERE o.telegram_id=$1")).
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT c.id, c.token, c.owner_id, c.name, c.email FROM companies AS c INNER JOIN owners As o ON o.id = c.owner_id WHERE o.telegram_id=$1")).
 			WithArgs(id).
 			WillReturnRows(rows)
 		repo := New(f.DB)
 
 		// Act
-		companies, err := repo.GetCompaniesByOwnerId(context.Background(), id)
+		company, err := repo.GetCompanyByOwnerTelegramId(context.Background(), id)
 
 		// Assert
 		assert.NoError(t, err)
-		assert.ElementsMatch(t, companiesExp, companies)
+		assert.Equal(t, companyExp, company)
 	})
 
-	t.Run("without companies", func(t *testing.T) {
+	t.Run("without company", func(t *testing.T) {
 		// Arrange
 		t.Parallel()
 		f := database.NewFixture(t)
 		defer f.Teardown()
 
 		var id int64 = 21
-		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT name, email FROM companies AS c INNER JOIN owners As o ON o.id = c.owner_id WHERE o.telegram_id=$1")).
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT c.id, c.token, c.owner_id, c.name, c.email FROM companies AS c INNER JOIN owners As o ON o.id = c.owner_id WHERE o.telegram_id=$1")).
 			WithArgs(id).
 			WillReturnError(sql.ErrNoRows)
 		repo := New(f.DB)
 
 		// Act
-		companies, err := repo.GetCompaniesByOwnerId(context.Background(), id)
+		company, err := repo.GetCompanyByOwnerTelegramId(context.Background(), id)
 
 		// Assert
 		assert.ErrorIs(t, err, storage.ErrNotFound)
-		assert.Equal(t, []entities.Company{}, companies)
+		assert.Equal(t, entities.Company{}, company)
 	})
 
 	t.Run("with error", func(t *testing.T) {
@@ -145,16 +135,16 @@ func TestCompanyStorage_GetCompaniesByOwnerId(t *testing.T) {
 		expectErr := errors.New("test error")
 
 		var id int64 = 21
-		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT name, email FROM companies AS c INNER JOIN owners As o ON o.id = c.owner_id WHERE o.telegram_id=$1")).
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT c.id, c.token, c.owner_id, c.name, c.email FROM companies AS c INNER JOIN owners As o ON o.id = c.owner_id WHERE o.telegram_id=$1")).
 			WithArgs(id).
 			WillReturnError(expectErr)
 		repo := New(f.DB)
 
 		// Act
-		companies, err := repo.GetCompaniesByOwnerId(context.Background(), id)
+		company, err := repo.GetCompanyByOwnerTelegramId(context.Background(), id)
 
 		// Assert
 		assert.Error(t, expectErr, err)
-		assert.Equal(t, []entities.Company{}, companies)
+		assert.Equal(t, entities.Company{}, company)
 	})
 }

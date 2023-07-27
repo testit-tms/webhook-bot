@@ -22,8 +22,8 @@ func New(db *sqlx.DB) *ChatStorage {
 }
 
 const (
-	getChatsByCompanyId   = "SELECT id, company_id, telegram_id, telegram_name FROM chats WHERE company_id=$1"
-	addChat               = "INSERT INTO chats (company_id, telegram_id, telegram_name) VALUES ($1, $2, $3) RETURNING id, company_id, telegram_id, telegram_name"
+	getChatsByCompanyId   = "SELECT id, company_id, telegram_id FROM chats WHERE company_id=$1"
+	addChat               = "INSERT INTO chats (company_id, telegram_id) VALUES ($1, $2) RETURNING id, company_id, telegram_id"
 	deleteChatById        = "DELETE FROM chats WHERE id=$1"
 	deleteChatByCompanyId = "DELETE FROM chats WHERE company_id=$1"
 )
@@ -49,7 +49,7 @@ func (r *ChatStorage) AddChat(ctx context.Context, chat entities.Chat) (entities
 
 	newChat := entities.Chat{}
 
-	err := r.db.QueryRowxContext(ctx, addChat, chat.CompanyId, chat.TelegramId, chat.TelegramName).StructScan(&newChat)
+	err := r.db.QueryRowxContext(ctx, addChat, chat.CompanyId, chat.TelegramId).StructScan(&newChat)
 	if err != nil {
 		return newChat, fmt.Errorf("%s: execute query: %w", op, err)
 	}

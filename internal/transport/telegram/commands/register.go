@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/go-playground/validator/v10"
@@ -9,6 +10,7 @@ import (
 	"github.com/testit-tms/webhook-bot/internal/entities"
 	"github.com/testit-tms/webhook-bot/internal/lib/logger/sl"
 	"github.com/testit-tms/webhook-bot/internal/transport/telegram/models"
+	"github.com/testit-tms/webhook-bot/internal/usecases/registration"
 	"golang.org/x/exp/slog"
 )
 
@@ -16,6 +18,7 @@ type regUsecase interface {
 	RegisterCompany(ctx context.Context, c entities.CompanyRegistrationInfo) error
 }
 
+// TODO: move to companyCommands
 type Registrator struct {
 	logger  *slog.Logger
 	waitMap map[int64]models.Company
@@ -78,6 +81,10 @@ func (r *Registrator) Action(m *tgbotapi.Message, step int) (tgbotapi.MessageCon
 		}
 		err = r.u.RegisterCompany(context.Background(), company.ToCompanyInfo())
 		if err != nil {
+			if errors.Is(err, registration.ErrCompanyAlreadyExists) {
+				logger.Debug("company already exists", sl.Err(err))
+				return tgbotapi.NewMessage(m.Chat.ID, "You already have company"), 0
+			}
 			logger.Error("register company", sl.Err(err))
 			return tgbotapi.NewMessage(m.Chat.ID, "Something went wrong. Lets try again"), 0
 		}

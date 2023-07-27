@@ -23,7 +23,8 @@ func New(db *sqlx.DB) *CompanyStorage {
 
 const (
 	addCompany          = "INSERT INTO companies (token, owner_id, name, email) VALUES ($1, $2, $3, $4) RETURNING id, token, owner_id, name, email"
-	getCompanyByOwnerId = "SELECT name, email FROM companies AS c INNER JOIN owners As o ON o.id = c.owner_id WHERE o.telegram_id=$1"
+	getCompanyByOwnerId = "SELECT c.id, c.token, c.owner_id, c.name, c.email FROM companies AS c INNER JOIN owners As o ON o.id = c.owner_id WHERE o.telegram_id=$1"
+	getCompanyIdByName  = "SELECT id FROM companies WHERE name=$1"
 )
 
 func (s *CompanyStorage) AddCompany(ctx context.Context, company entities.Company) (entities.Company, error) {
@@ -39,20 +40,19 @@ func (s *CompanyStorage) AddCompany(ctx context.Context, company entities.Compan
 	return newCompany, nil
 }
 
-// TODO: rename to GetCompanyByOwnerTelegramId
-func (s *CompanyStorage) GetCompaniesByOwnerId(ctx context.Context, ownerId int64) ([]entities.Company, error) {
+func (s *CompanyStorage) GetCompanyByOwnerTelegramId(ctx context.Context, ownerId int64) (entities.Company, error) {
 	const op = "storage.postgres.GetCompanyByOwnerId"
 
-	companies := []entities.Company{}
+	company := entities.Company{}
 
-	err := s.db.SelectContext(ctx, &companies, getCompanyByOwnerId, ownerId)
+	err := s.db.GetContext(ctx, &company, getCompanyByOwnerId, ownerId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return companies, storage.ErrNotFound
+			return company, storage.ErrNotFound
 		}
 
-		return companies, fmt.Errorf("%s: execute query: %w", op, err)
+		return company, fmt.Errorf("%s: execute query: %w", op, err)
 	}
 
-	return companies, nil
+	return company, nil
 }

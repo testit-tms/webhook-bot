@@ -27,21 +27,19 @@ func TestChatStorage_GetChatsByCompanyId(t *testing.T) {
 				Id:           12,
 				CompanyId:    id,
 				TelegramId:   123456,
-				TelegramName: "MyChat",
 			},
 			{
 				Id:           13,
 				CompanyId:    id,
 				TelegramId:   654321,
-				TelegramName: "AnyChat",
 			},
 		}
 
-		rows := sqlmock.NewRows([]string{"id", "company_id", "telegram_id", "telegram_name"}).
-			AddRow("12", "21", "123456", "MyChat").
-			AddRow("13", "21", "654321", "AnyChat")
+		rows := sqlmock.NewRows([]string{"id", "company_id", "telegram_id"}).
+			AddRow("12", "21", "123456").
+			AddRow("13", "21", "654321")
 
-		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, company_id, telegram_id, telegram_name FROM chats WHERE company_id=$1")).
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, company_id, telegram_id FROM chats WHERE company_id=$1")).
 			WithArgs(id).
 			WillReturnRows(rows)
 		repo := New(f.DB)
@@ -61,7 +59,7 @@ func TestChatStorage_GetChatsByCompanyId(t *testing.T) {
 		defer f.Teardown()
 
 		var id int64 = 21
-		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, company_id, telegram_id, telegram_name FROM chats WHERE company_id=$1")).
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, company_id, telegram_id FROM chats WHERE company_id=$1")).
 			WithArgs(id).
 			WillReturnError(sql.ErrNoRows)
 		repo := New(f.DB)
@@ -83,7 +81,7 @@ func TestChatStorage_GetChatsByCompanyId(t *testing.T) {
 		expectErr := errors.New("test error")
 
 		var id int64 = 21
-		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, company_id, telegram_id, telegram_name FROM chats WHERE company_id=$1")).
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, company_id, telegram_id FROM chats WHERE company_id=$1")).
 			WithArgs(id).
 			WillReturnError(expectErr)
 		repo := New(f.DB)
@@ -107,13 +105,12 @@ func TestChatStorage_AddChat(t *testing.T) {
 			Id:           12,
 			CompanyId:    21,
 			TelegramId:   123456,
-			TelegramName: "MyChat",
 		}
-		rows := sqlmock.NewRows([]string{"id", "company_id", "telegram_id", "telegram_name"}).
-			AddRow(12, 21, "123456", "MyChat")
+		rows := sqlmock.NewRows([]string{"id", "company_id", "telegram_id"}).
+			AddRow(12, 21, "123456")
 
-		f.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO chats (company_id, telegram_id, telegram_name) VALUES ($1, $2, $3) RETURNING id, company_id, telegram_id, telegram_name")).
-			WithArgs(expectedChat.CompanyId, expectedChat.TelegramId, expectedChat.TelegramName).
+		f.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO chats (company_id, telegram_id) VALUES ($1, $2) RETURNING id, company_id, telegram_id")).
+			WithArgs(expectedChat.CompanyId, expectedChat.TelegramId).
 			WillReturnRows(rows)
 
 		repo := New(f.DB)
@@ -137,11 +134,10 @@ func TestChatStorage_AddChat(t *testing.T) {
 			Id:           12,
 			CompanyId:    21,
 			TelegramId:   123456,
-			TelegramName: "MyChat",
 		}
 
-		f.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO chats (company_id, telegram_id, telegram_name) VALUES ($1, $2, $3) RETURNING id, company_id, telegram_id, telegram_name")).
-			WithArgs(expectedChat.CompanyId, expectedChat.TelegramId, expectedChat.TelegramName).
+		f.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO chats (company_id, telegram_id) VALUES ($1, $2) RETURNING id, company_id, telegram_id")).
+			WithArgs(expectedChat.CompanyId, expectedChat.TelegramId).
 			WillReturnError(expectErr)
 
 		repo := New(f.DB)

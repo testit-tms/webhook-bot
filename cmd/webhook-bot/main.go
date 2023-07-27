@@ -34,7 +34,7 @@ func main() {
 
 	ownerStorage := owner.New(db)
 	companyStorage := company.New(db)
-	_ = chat.New(db)
+	chatStorage := chat.New(db)
 
 	regUsecases := registration.New(ownerStorage, companyStorage)
 	registrator := commands.NewRegistrator(logger, regUsecases)
@@ -42,7 +42,10 @@ func main() {
 	companyUsesaces := usecases.NewCompanyUsecases(companyStorage)
 	companyCommands := commands.NewCompanyCommands(companyUsesaces)
 
-	bot, err := telegram.New(logger, cfg.TelegramBot.Token, registrator, companyCommands)
+	chatUsesaces := usecases.NewChatUsecases(chatStorage)
+	chatCommands := commands.NewChatCommands(chatUsesaces, companyUsesaces)
+
+	bot, err := telegram.New(logger, cfg.TelegramBot.Token, registrator, companyCommands, chatCommands)
 	if err != nil {
 		logger.Error("cannot create telegram bot", err)
 	}

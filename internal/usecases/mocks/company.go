@@ -35,17 +35,17 @@ func (m *MockcompanyStorage) EXPECT() *MockcompanyStorageMockRecorder {
 	return m.recorder
 }
 
-// GetCompaniesByOwnerId mocks base method.
-func (m *MockcompanyStorage) GetCompaniesByOwnerId(ctx context.Context, ownerId int64) ([]entities.Company, error) {
+// GetCompanyByOwnerTelegramId mocks base method.
+func (m *MockcompanyStorage) GetCompanyByOwnerTelegramId(ctx context.Context, ownerId int64) (entities.Company, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCompaniesByOwnerId", ctx, ownerId)
-	ret0, _ := ret[0].([]entities.Company)
+	ret := m.ctrl.Call(m, "GetCompanyByOwnerTelegramId", ctx, ownerId)
+	ret0, _ := ret[0].(entities.Company)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetCompaniesByOwnerId indicates an expected call of GetCompaniesByOwnerId.
-func (mr *MockcompanyStorageMockRecorder) GetCompaniesByOwnerId(ctx, ownerId interface{}) *gomock.Call {
+// GetCompanyByOwnerTelegramId indicates an expected call of GetCompanyByOwnerTelegramId.
+func (mr *MockcompanyStorageMockRecorder) GetCompanyByOwnerTelegramId(ctx, ownerId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCompaniesByOwnerId", reflect.TypeOf((*MockcompanyStorage)(nil).GetCompaniesByOwnerId), ctx, ownerId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCompanyByOwnerTelegramId", reflect.TypeOf((*MockcompanyStorage)(nil).GetCompanyByOwnerTelegramId), ctx, ownerId)
 }

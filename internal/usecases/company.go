@@ -2,19 +2,25 @@ package usecases
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/testit-tms/webhook-bot/internal/entities"
+	"github.com/testit-tms/webhook-bot/internal/storage"
 )
 
 //go:generate mockgen -source=$GOFILE -destination=$PWD/mocks/${GOFILE} -package=mocks
 type companyStorage interface {
-	GetCompaniesByOwnerId(ctx context.Context, ownerId int64) ([]entities.Company, error)
+	GetCompanyByOwnerTelegramId(ctx context.Context, ownerId int64) (entities.Company, error)
 }
 
 type companyUsecases struct {
 	cs companyStorage
 }
+
+var (
+	ErrCompanyNotFound = errors.New("company not found")
+)
 
 func NewCompanyUsecases(cs companyStorage) *companyUsecases {
 	return &companyUsecases{
@@ -22,21 +28,16 @@ func NewCompanyUsecases(cs companyStorage) *companyUsecases {
 	}
 }
 
-func (u *companyUsecases) GetCompaniesByOwnerId(ctx context.Context, ownerId int64) ([]entities.CompanyInfo, error) {
-	const op = "usecases.GetCompaniesByOwnerId"
+func (u *companyUsecases) GetCompanyByOwnerTelegramId(ctx context.Context, ownerId int64) (entities.Company, error) {
+	const op = "usecases.GetCompanyByOwnerTelegramId"
 
-	companies, err := u.cs.GetCompaniesByOwnerId(ctx, ownerId)
+	company, err := u.cs.GetCompanyByOwnerTelegramId(ctx, ownerId)
 	if err != nil {
-		return nil, fmt.Errorf("%s: get companies by owner id: %w", op, err)
+		if errors.Is(err, storage.ErrNotFound) {
+			return entities.Company{}, fmt.Errorf("%s: %w", op, ErrCompanyNotFound)
+		}
+		return entities.Company{}, fmt.Errorf("%s: get company by owner id: %w", op, err)
 	}
 
-	companiesInfo := []entities.CompanyInfo{}
-	for _, company := range companies {
-		companiesInfo = append(companiesInfo, entities.CompanyInfo{
-			Name:  company.Name,
-			Email: company.Email,
-		})
-	}
-
-	return companiesInfo, nil
+	return company, nil
 }

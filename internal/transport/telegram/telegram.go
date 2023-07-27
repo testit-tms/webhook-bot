@@ -14,6 +14,7 @@ const (
 	rigesterCommand = "register"
 	getChatID       = "get_chat_id"
 	getMyCompanies  = "get_my_companies"
+	addChat         = "add_chat"
 )
 
 type registrator interface {
@@ -25,16 +26,21 @@ type companyCommands interface {
 	GetMyCompanies(m *tgbotapi.Message) (tgbotapi.MessageConfig, error)
 }
 
+type chatCommands interface {
+	AddChat(m *tgbotapi.Message) (tgbotapi.MessageConfig, error)
+}
+
 type TelegramBot struct {
 	logger           *slog.Logger
 	bot              *tgbotapi.BotAPI
 	waitConversation map[int64]Conversation
 	registrator      registrator
 	cc               companyCommands
+	chc              chatCommands
 }
 
 // New creates a new TelegramBot instance
-func New(logger *slog.Logger, token string, r registrator, cc companyCommands) (*TelegramBot, error) {
+func New(logger *slog.Logger, token string, r registrator, cc companyCommands, chc chatCommands) (*TelegramBot, error) {
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		return nil, err
@@ -46,6 +52,7 @@ func New(logger *slog.Logger, token string, r registrator, cc companyCommands) (
 			waitConversation: make(map[int64]Conversation),
 			registrator:      r,
 			cc:               cc,
+			chc:              chc,
 		},
 		nil
 }
@@ -98,7 +105,14 @@ func (b *TelegramBot) Run() {
 		case getMyCompanies:
 			msg, err := b.cc.GetMyCompanies(update.Message)
 			if err != nil {
-				b.logger.Error("cannot get companies", sl.Err(err))
+				b.logger.Error("cannot get company", sl.Err(err))
+			}
+			b.sendMessage(msg)
+			continue
+		case addChat:
+			msg, err := b.chc.AddChat(update.Message)
+			if err != nil {
+				b.logger.Error("cannot add chat", sl.Err(err))
 			}
 			b.sendMessage(msg)
 			continue

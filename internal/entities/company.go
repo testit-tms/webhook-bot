@@ -13,8 +13,3 @@ type CompanyRegistrationInfo struct {
 	Email string
 	Owner OwnerInfo
 }
-
-type CompanyInfo struct {
-	Name  string
-	Email string
-}
