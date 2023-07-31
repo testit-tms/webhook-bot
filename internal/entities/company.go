@@ -13,3 +13,12 @@ type CompanyRegistrationInfo struct {
 	Email string
 	Owner OwnerInfo
 }
+
+type CompanyInfo struct {
+	Id      int64
+	OwnerId int64
+	Token   string
+	Name    string
+	Email   string
+	ChatIds []int64
+}

@@ -39,7 +39,7 @@ func main() {
 	regUsecases := registration.New(ownerStorage, companyStorage)
 	registrator := commands.NewRegistrator(logger, regUsecases)
 
-	companyUsesaces := usecases.NewCompanyUsecases(companyStorage)
+	companyUsesaces := usecases.NewCompanyUsecases(companyStorage, chatStorage)
 	companyCommands := commands.NewCompanyCommands(companyUsesaces)
 
 	chatUsesaces := usecases.NewChatUsecases(chatStorage)

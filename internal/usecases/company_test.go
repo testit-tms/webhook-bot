@@ -15,62 +15,137 @@ import (
 
 func Test_companyUsecases_GetCompanyByOwnerId(t *testing.T) {
 	tests := []struct {
-		name           string
-		ownerId        int64
-		want           entities.Company
-		mockEntities   entities.Company
-		mockError      error
-		wantErr        bool
-		wantErrMessage string
+		name             string
+		ownerId          int64
+		want             entities.CompanyInfo
+		mockCompEntities entities.Company
+		mockCompError    error
+		mockCompTimes    int
+		mockChatEntities []entities.Chat
+		mockChatError    error
+		mockChatTimes    int
+		wantErr          bool
+		wantErrMessage   string
 	}{
 		{
 			name:    "success",
 			ownerId: 1,
-			want: entities.Company{
+			want: entities.CompanyInfo{
+				Id:      12,
+				OwnerId: 21,
+				Token:   "token",
+				Name:    "Yandex",
+				Email:   "info@ya.ru",
+				ChatIds: []int64{
+					123,
+				},
+			},
+			mockCompEntities: entities.Company{
 				Id:      12,
 				OwnerId: 21,
 				Token:   "token",
 				Name:    "Yandex",
 				Email:   "info@ya.ru",
 			},
-			mockEntities: entities.Company{
+			mockCompError: nil,
+			mockCompTimes: 1,
+			mockChatEntities: []entities.Chat{
+				{
+					Id:         1,
+					CompanyId:  12,
+					TelegramId: 123,
+				},
+			},
+			mockChatError: nil,
+			mockChatTimes: 1,
+			wantErr:       false,
+		},
+		{
+			name:             "company with ErrNotFound",
+			ownerId:          1,
+			want:             entities.CompanyInfo{},
+			mockCompEntities: entities.Company{},
+			mockCompError:    storage.ErrNotFound,
+			mockCompTimes:    1,
+			mockChatTimes:    0,
+			wantErr:          true,
+			wantErrMessage:   "usecases.GetCompanyByOwnerTelegramId: company not found",
+		},
+		{
+			name:             "company with other error",
+			ownerId:          1,
+			want:             entities.CompanyInfo{},
+			mockCompEntities: entities.Company{},
+			mockCompError:    errors.New("test error"),
+			mockCompTimes:    1,
+			mockChatTimes:    0,
+			wantErr:          true,
+			wantErrMessage:   "usecases.GetCompanyByOwnerTelegramId: get company by owner id: test error",
+		},
+		{
+			name:    "chats with ErrNotFound",
+			ownerId: 1,
+			want: entities.CompanyInfo{
+				Id:      12,
+				OwnerId: 21,
+				Token:   "token",
+				Name:    "Yandex",
+				Email:   "info@ya.ru",
+				ChatIds: nil,
+			},
+			mockCompEntities: entities.Company{
 				Id:      12,
 				OwnerId: 21,
 				Token:   "token",
 				Name:    "Yandex",
 				Email:   "info@ya.ru",
 			},
-			mockError: nil,
-			wantErr:   false,
+			mockCompError:    nil,
+			mockCompTimes:    1,
+			mockChatEntities: []entities.Chat{},
+			mockChatError:    storage.ErrNotFound,
+			mockChatTimes:    1,
+			wantErr:          false,
 		},
 		{
-			name:           "with ErrNotFound",
-			ownerId:        1,
-			want:           entities.Company{},
-			mockEntities:   entities.Company{},
-			mockError:      storage.ErrNotFound,
-			wantErr:        true,
-			wantErrMessage: "usecases.GetCompanyByOwnerTelegramId: company not found",
-		},
-		{
-			name:           "with other error",
-			ownerId:        1,
-			want:           entities.Company{},
-			mockEntities:   entities.Company{},
-			mockError:      errors.New("test error"),
-			wantErr:        true,
-			wantErrMessage: "usecases.GetCompanyByOwnerTelegramId: get company by owner id: test error",
+			name:    "chats with other error",
+			ownerId: 1,
+			want: entities.CompanyInfo{
+				Id:      12,
+				OwnerId: 21,
+				Token:   "token",
+				Name:    "Yandex",
+				Email:   "info@ya.ru",
+				ChatIds: nil,
+			},
+			mockCompEntities: entities.Company{
+				Id:      12,
+				OwnerId: 21,
+				Token:   "token",
+				Name:    "Yandex",
+				Email:   "info@ya.ru",
+			},
+			mockCompError:    nil,
+			mockCompTimes:    1,
+			mockChatEntities: []entities.Chat{},
+			mockChatError:    errors.New("test error"),
+			mockChatTimes:    1,
+			wantErr:          true,
+			wantErrMessage:   "usecases.GetCompanyByOwnerTelegramId: get chats by company id: test error",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockCtrl := gomock.NewController(t)
-			storageMock := mocks.NewMockcompanyStorage(mockCtrl)
-			storageMock.EXPECT().GetCompanyByOwnerTelegramId(gomock.Any(), tt.ownerId).Return(tt.mockEntities, tt.mockError).Times(1)
+			companyMock := mocks.NewMockcompanyStorage(mockCtrl)
+			companyMock.EXPECT().GetCompanyByOwnerTelegramId(gomock.Any(), tt.ownerId).Return(tt.mockCompEntities, tt.mockCompError).Times(tt.mockCompTimes)
 
-			u := &companyUsecases{
-				cs: storageMock,
+			chatMock := mocks.NewMockchatStorage(mockCtrl)
+			if tt.mockChatTimes != 0 {
+				chatMock.EXPECT().GetChatsByCompanyId(gomock.Any(), tt.mockCompEntities.Id).Return(tt.mockChatEntities, tt.mockChatError).Times(tt.mockChatTimes)
 			}
+
+			u := NewCompanyUsecases(companyMock, chatMock)
 
 			got, err := u.GetCompanyByOwnerTelegramId(context.Background(), tt.ownerId)
 			if err != nil {

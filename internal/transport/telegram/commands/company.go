@@ -12,7 +12,7 @@ import (
 )
 
 type companyUsesaces interface {
-	GetCompanyByOwnerTelegramId(ctx context.Context, ownerId int64) (entities.Company, error)
+	GetCompanyByOwnerTelegramId(ctx context.Context, ownerId int64) (entities.CompanyInfo, error)
 }
 
 type CompanyCommands struct {
@@ -51,6 +51,13 @@ func (c *CompanyCommands) GetMyCompanies(m *tgbotapi.Message) (tgbotapi.MessageC
 		*Name:*  _%s_ 
 		*Email:* _%s_
 		`, company.Name, strings.Replace(company.Email, ".", "\\.", 1))
+
+	if len(company.ChatIds) > 0 {
+		msg.Text += "\n*Chats:*"
+		for _, chatId := range company.ChatIds {
+			msg.Text += strings.Replace(fmt.Sprintf("\n%d", chatId), "-", "\\-", 1)
+		}
+	}
 
 	return msg, nil
 }

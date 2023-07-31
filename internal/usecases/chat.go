@@ -6,6 +6,7 @@ import (
 	"github.com/testit-tms/webhook-bot/internal/entities"
 )
 
+//go:generate mockgen -source=$GOFILE -destination=$PWD/mocks/${GOFILE} -package=mocks
 type chatsStorage interface {
 	AddChat(ctx context.Context, chat entities.Chat) (entities.Chat, error)
 }

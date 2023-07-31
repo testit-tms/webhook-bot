@@ -49,3 +49,41 @@ func (mr *MockcompanyStorageMockRecorder) GetCompanyByOwnerTelegramId(ctx, owner
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCompanyByOwnerTelegramId", reflect.TypeOf((*MockcompanyStorage)(nil).GetCompanyByOwnerTelegramId), ctx, ownerId)
 }
+
+// MockchatStorage is a mock of chatStorage interface.
+type MockchatStorage struct {
+	ctrl     *gomock.Controller
+	recorder *MockchatStorageMockRecorder
+}
+
+// MockchatStorageMockRecorder is the mock recorder for MockchatStorage.
+type MockchatStorageMockRecorder struct {
+	mock *MockchatStorage
+}
+
+// NewMockchatStorage creates a new mock instance.
+func NewMockchatStorage(ctrl *gomock.Controller) *MockchatStorage {
+	mock := &MockchatStorage{ctrl: ctrl}
+	mock.recorder = &MockchatStorageMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockchatStorage) EXPECT() *MockchatStorageMockRecorder {
+	return m.recorder
+}
+
+// GetChatsByCompanyId mocks base method.
+func (m *MockchatStorage) GetChatsByCompanyId(ctx context.Context, id int64) ([]entities.Chat, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetChatsByCompanyId", ctx, id)
+	ret0, _ := ret[0].([]entities.Chat)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetChatsByCompanyId indicates an expected call of GetChatsByCompanyId.
+func (mr *MockchatStorageMockRecorder) GetChatsByCompanyId(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChatsByCompanyId", reflect.TypeOf((*MockchatStorage)(nil).GetChatsByCompanyId), ctx, id)
+}
