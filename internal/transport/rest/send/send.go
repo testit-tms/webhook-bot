@@ -28,6 +28,13 @@ func New(log *slog.Logger, sender sender) http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
+		token := r.Header.Get("Autorization")
+		if token == "" {
+			log.Debug("token not found")
+			handlers.NewErrorResponse(w, http.StatusUnauthorized, "token is required")
+			return
+		}
+
 		var req Request
 
 		err := render.DecodeJSON(r.Body, &req)
@@ -53,6 +60,7 @@ func New(log *slog.Logger, sender sender) http.HandlerFunc {
 		}
 
 		message := req.convertToDomain()
+		message.Token = token
 
 		log.Debug("request convert to message", slog.Any("message", message))
 

@@ -5,6 +5,8 @@ import "strings"
 type Message struct {
 	Text      string
 	ParseMode ParseMode
+	Token     string
+	ChatIds   []int64
 }
 
 type ParseMode string

@@ -24,14 +24,14 @@ func TestChatStorage_GetChatsByCompanyId(t *testing.T) {
 		var id int64 = 21
 		chatsExp := []entities.Chat{
 			{
-				Id:           12,
-				CompanyId:    id,
-				TelegramId:   123456,
+				Id:         12,
+				CompanyId:  id,
+				TelegramId: 123456,
 			},
 			{
-				Id:           13,
-				CompanyId:    id,
-				TelegramId:   654321,
+				Id:         13,
+				CompanyId:  id,
+				TelegramId: 654321,
 			},
 		}
 
@@ -95,6 +95,87 @@ func TestChatStorage_GetChatsByCompanyId(t *testing.T) {
 	})
 }
 
+func TestChatStorage_GetChatsByCompanyToken(t *testing.T) {
+	t.Run("with chats", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		token := "123"
+		chatsExp := []entities.Chat{
+			{
+				Id:         12,
+				CompanyId:  21,
+				TelegramId: 123456,
+			},
+			{
+				Id:         13,
+				CompanyId:  21,
+				TelegramId: 654321,
+			},
+		}
+
+		rows := sqlmock.NewRows([]string{"id", "company_id", "telegram_id"}).
+			AddRow("12", "21", "123456").
+			AddRow("13", "21", "654321")
+
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, company_id, telegram_id FROM chats WHERE company_id=(SELECT id FROM companies WHERE token=$1)")).
+			WithArgs(token).
+			WillReturnRows(rows)
+		repo := New(f.DB)
+
+		// Act
+		chats, err := repo.GetChatsByCompanyToken(context.Background(), token)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, chatsExp, chats)
+	})
+
+	t.Run("without chats", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		token := "123"
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, company_id, telegram_id FROM chats WHERE company_id=(SELECT id FROM companies WHERE token=$1)")).
+			WithArgs(token).
+			WillReturnError(sql.ErrNoRows)
+		repo := New(f.DB)
+
+		// Act
+		chats, err := repo.GetChatsByCompanyToken(context.Background(), token)
+
+		// Assert
+		assert.ErrorIs(t, err, storage.ErrNotFound)
+		assert.Equal(t, []entities.Chat{}, chats)
+	})
+
+	t.Run("with error", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		expectErr := errors.New("test error")
+
+		token := "123"
+		f.Mock.ExpectQuery(regexp.QuoteMeta("SELECT id, company_id, telegram_id FROM chats WHERE company_id=(SELECT id FROM companies WHERE token=$1)")).
+			WithArgs(token).
+			WillReturnError(expectErr)
+		repo := New(f.DB)
+
+		// Act
+		chats, err := repo.GetChatsByCompanyToken(context.Background(), token)
+
+		// Assert
+		assert.Error(t, expectErr, err)
+		assert.Equal(t, []entities.Chat{}, chats)
+	})
+}
+
 func TestChatStorage_AddChat(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		// Arrange
@@ -102,9 +183,9 @@ func TestChatStorage_AddChat(t *testing.T) {
 		f := database.NewFixture(t)
 		defer f.Teardown()
 		expectedChat := entities.Chat{
-			Id:           12,
-			CompanyId:    21,
-			TelegramId:   123456,
+			Id:         12,
+			CompanyId:  21,
+			TelegramId: 123456,
 		}
 		rows := sqlmock.NewRows([]string{"id", "company_id", "telegram_id"}).
 			AddRow(12, 21, "123456")
@@ -131,9 +212,9 @@ func TestChatStorage_AddChat(t *testing.T) {
 
 		expectErr := errors.New("test error")
 		expectedChat := entities.Chat{
-			Id:           12,
-			CompanyId:    21,
-			TelegramId:   123456,
+			Id:         12,
+			CompanyId:  21,
+			TelegramId: 123456,
 		}
 
 		f.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO chats (company_id, telegram_id) VALUES ($1, $2) RETURNING id, company_id, telegram_id")).

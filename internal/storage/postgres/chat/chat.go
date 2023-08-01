@@ -22,10 +22,11 @@ func New(db *sqlx.DB) *ChatStorage {
 }
 
 const (
-	getChatsByCompanyId   = "SELECT id, company_id, telegram_id FROM chats WHERE company_id=$1"
-	addChat               = "INSERT INTO chats (company_id, telegram_id) VALUES ($1, $2) RETURNING id, company_id, telegram_id"
-	deleteChatById        = "DELETE FROM chats WHERE id=$1"
-	deleteChatByCompanyId = "DELETE FROM chats WHERE company_id=$1"
+	getChatsByCompanyId    = "SELECT id, company_id, telegram_id FROM chats WHERE company_id=$1"
+	getChatsByCompanyToken = "SELECT id, company_id, telegram_id FROM chats WHERE company_id=(SELECT id FROM companies WHERE token=$1)"
+	addChat                = "INSERT INTO chats (company_id, telegram_id) VALUES ($1, $2) RETURNING id, company_id, telegram_id"
+	deleteChatById         = "DELETE FROM chats WHERE id=$1"
+	deleteChatByCompanyId  = "DELETE FROM chats WHERE company_id=$1"
 )
 
 func (s *ChatStorage) GetChatsByCompanyId(ctx context.Context, id int64) ([]entities.Chat, error) {
@@ -34,6 +35,22 @@ func (s *ChatStorage) GetChatsByCompanyId(ctx context.Context, id int64) ([]enti
 	chats := []entities.Chat{}
 
 	if err := s.db.SelectContext(ctx, &chats, getChatsByCompanyId, id); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return chats, storage.ErrNotFound
+		}
+
+		return chats, fmt.Errorf("%s: execute query: %w", op, err)
+	}
+
+	return chats, nil
+}
+
+func (s *ChatStorage) GetChatsByCompanyToken(ctx context.Context, t string) ([]entities.Chat, error) {
+	const op = "storage.postgres.GetChatsByCompanyToken"
+
+	chats := []entities.Chat{}
+
+	if err := s.db.SelectContext(ctx, &chats, getChatsByCompanyToken, t); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return chats, storage.ErrNotFound
 		}
