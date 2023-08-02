@@ -4,7 +4,7 @@ Content-Type: application/json
 Authorization: E90hr$}E0p)^HR<C@5w>mvWp~uFP9{
 
 {
-  "message": "<b>bold</b>, <strong>bold</strong>",
+  "message": "<b>bold</b>, <strong>bold</strong>\nsome text",
   "parseMode": "HTML"
 }
 
@@ -14,7 +14,7 @@ Content-Type: application/json
 Authorization: E90hr$}E0p)^HR<C@5w>mvWp~uFP9{
 
 {
-  "message": "<b>bold</b>, <strong>bold</strong>",
+  "message": "<b>bold</b>, <strong>bold</strong>\nsome text",
   "parseMode": "HTML",
   "chatIds": [
     368414991
@@ -24,10 +24,10 @@ Authorization: E90hr$}E0p)^HR<C@5w>mvWp~uFP9{
 ### Send POST request with json body and chatId (MarkdownV2)
 POST http://localhost:8080/telegram
 Content-Type: application/json
-Authorization: E90hr$}E0p)^HR<C@5w>mvWp~uFP9{
+Authorization: tWH1VKGaGdem8RIbumCewKnj3yl1YV
 
 {
-  "message": "*bold*, _bold_",
+  "message": "*bold*, _italic_ \nsome text",
   "parseMode": "MarkdownV2",
   "chatIds": [
     368414991
