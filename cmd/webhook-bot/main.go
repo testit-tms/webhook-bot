@@ -50,7 +50,7 @@ func main() {
 	companyUsesaces := usecases.NewCompanyUsecases(companyStorage, chatStorage)
 	companyCommands := commands.NewCompanyCommands(companyUsesaces)
 
-	chatUsesaces := usecases.NewChatUsecases(chatStorage)
+	chatUsesaces := usecases.NewChatUsecases(chatStorage, companyStorage)
 	chatCommands := commands.NewChatCommands(chatUsesaces, companyUsesaces)
 
 	bot, err := telegram.New(logger, cfg.TelegramBot.Token, registrator, companyCommands, chatCommands)
@@ -64,6 +64,7 @@ func main() {
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
+	// TODO: move to separate package
 	router := chi.NewRouter()
 
 	router.Use(middleware.RequestID)

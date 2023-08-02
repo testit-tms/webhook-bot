@@ -49,3 +49,32 @@ func (mr *MockchatsStorageMockRecorder) AddChat(ctx, chat interface{}) *gomock.C
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddChat", reflect.TypeOf((*MockchatsStorage)(nil).AddChat), ctx, chat)
 }
+
+// DeleteChatById mocks base method.
+func (m *MockchatsStorage) DeleteChatById(ctx context.Context, id int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteChatById", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteChatById indicates an expected call of DeleteChatById.
+func (mr *MockchatsStorageMockRecorder) DeleteChatById(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteChatById", reflect.TypeOf((*MockchatsStorage)(nil).DeleteChatById), ctx, id)
+}
+
+// GetChatsByCompanyId mocks base method.
+func (m *MockchatsStorage) GetChatsByCompanyId(ctx context.Context, id int64) ([]entities.Chat, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetChatsByCompanyId", ctx, id)
+	ret0, _ := ret[0].([]entities.Chat)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetChatsByCompanyId indicates an expected call of GetChatsByCompanyId.
+func (mr *MockchatsStorageMockRecorder) GetChatsByCompanyId(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChatsByCompanyId", reflect.TypeOf((*MockchatsStorage)(nil).GetChatsByCompanyId), ctx, id)
+}

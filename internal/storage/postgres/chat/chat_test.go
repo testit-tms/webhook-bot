@@ -238,7 +238,7 @@ func TestChatStorage_DeleteChatById(t *testing.T) {
 		t.Parallel()
 		f := database.NewFixture(t)
 		defer f.Teardown()
-		id := 12
+		var id int64 = 12
 
 		f.Mock.ExpectExec(regexp.QuoteMeta("DELETE FROM chats WHERE id=$1")).
 			WithArgs(id).
@@ -260,7 +260,7 @@ func TestChatStorage_DeleteChatById(t *testing.T) {
 		defer f.Teardown()
 
 		expectErr := errors.New("test error")
-		id := 12
+		var id int64 = 12
 
 		f.Mock.ExpectExec(regexp.QuoteMeta("DELETE FROM chats WHERE id=$1")).
 			WithArgs(id).

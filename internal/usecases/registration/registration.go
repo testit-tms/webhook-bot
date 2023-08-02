@@ -40,7 +40,23 @@ func New(os ownerStorage, cs companyStorage) *RegistrationUsecases {
 	}
 }
 
-// TODO: add transaction
+// TODO: move to usesases package and write tests
+func (r *RegistrationUsecases) CheckCompanyExists(ctx context.Context, ownerId int64) (bool, error) {
+	const op = "RegistrationUsecases.CheckCompanyExists"
+
+	_, err := r.cs.GetCompanyByOwnerTelegramId(ctx, ownerId)
+	if err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			return false, nil
+		}
+
+		return false, fmt.Errorf("%s: get company by owner id: %w", op, err)
+	}
+
+	return true, nil
+}
+
+// TODO: add transaction and tests
 func (r *RegistrationUsecases) RegisterCompany(ctx context.Context, c entities.CompanyRegistrationInfo) error {
 	const op = "RegistrationUsecases.RegisterCompany"
 

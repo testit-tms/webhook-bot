@@ -16,6 +16,7 @@ import (
 
 type regUsecase interface {
 	RegisterCompany(ctx context.Context, c entities.CompanyRegistrationInfo) error
+	CheckCompanyExists(ctx context.Context, ownerId int64) (bool, error)
 }
 
 // TODO: move to companyCommands
@@ -96,8 +97,18 @@ func (r *Registrator) Action(m *tgbotapi.Message, step int) (tgbotapi.MessageCon
 	}
 }
 
-func (r *Registrator) GetFirstMessage(chatID int64) tgbotapi.MessageConfig {
-	msg := tgbotapi.NewMessage(chatID, "Enter company name:")
+func (r *Registrator) GetFirstMessage(m *tgbotapi.Message) tgbotapi.MessageConfig {
+	e, err := r.u.CheckCompanyExists(context.Background(), m.From.ID)
+	if err != nil {
+		r.logger.Error("check company exists", sl.Err(err))
+		return tgbotapi.NewMessage(m.Chat.ID, "Something went wrong. Lets try again")
+	}
+
+	if e {
+		return tgbotapi.NewMessage(m.Chat.ID, "You already have company")
+	}
+	
+	msg := tgbotapi.NewMessage(m.Chat.ID, "Enter company name:")
 	msg.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true}
 	return msg
 }

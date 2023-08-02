@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/testit-tms/webhook-bot/internal/entities"
 )
@@ -9,19 +10,48 @@ import (
 //go:generate mockgen -source=$GOFILE -destination=$PWD/mocks/${GOFILE} -package=mocks
 type chatsStorage interface {
 	AddChat(ctx context.Context, chat entities.Chat) (entities.Chat, error)
+	DeleteChatById(ctx context.Context, id int64) error
+	GetChatsByCompanyId(ctx context.Context, id int64) ([]entities.Chat, error)
 }
 
 type chatUsecases struct {
-	cs chatsStorage
+	cs   chatsStorage
+	coms companyStorage
 }
 
-func NewChatUsecases(cs chatsStorage) *chatUsecases {
+func NewChatUsecases(cs chatsStorage, coms companyStorage) *chatUsecases {
 	return &chatUsecases{
-		cs: cs,
+		cs:   cs,
+		coms: coms,
 	}
 }
 
-// TODO: add test
 func (u *chatUsecases) AddChat(ctx context.Context, chat entities.Chat) (entities.Chat, error) {
 	return u.cs.AddChat(ctx, chat)
+}
+
+// TODO: write tests
+func (u *chatUsecases) DeleteChatByTelegramId(ctx context.Context, ownerId, chatId int64) error {
+	const op = "usecases.DeleteChatByTelegramId"
+
+	company, err := u.coms.GetCompanyByOwnerTelegramId(ctx, ownerId)
+	if err != nil {
+		return fmt.Errorf("%s: get company by owner id: %w", op, err)
+	}
+
+	chats, err := u.cs.GetChatsByCompanyId(ctx, company.Id)
+	if err != nil {
+		return fmt.Errorf("%s: get chats by company id: %w", op, err)
+	}
+
+	for _, chat := range chats {
+		if chat.TelegramId == chatId {
+			if err := u.cs.DeleteChatById(ctx, chat.Id); err != nil {
+				return fmt.Errorf("%s: delete chat by id: %w", op, err)
+			}
+			return nil
+		}
+	}
+
+	return fmt.Errorf("%s: chat not found", op)
 }

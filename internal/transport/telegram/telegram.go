@@ -22,7 +22,7 @@ const (
 
 type registrator interface {
 	Action(m *tgbotapi.Message, step int) (tgbotapi.MessageConfig, int)
-	GetFirstMessage(chatID int64) tgbotapi.MessageConfig
+	GetFirstMessage(m *tgbotapi.Message) tgbotapi.MessageConfig
 }
 
 type companyCommands interface {
@@ -91,14 +91,12 @@ func (b *TelegramBot) Run() {
 			continue
 		}
 
-		// Create a new MessageConfig. We don't have text yet,
-		// so we leave it empty.
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 
 		// Extract the command from the Message.
 		switch update.Message.Command() {
 		case rigesterCommand:
-			msg = b.registrator.GetFirstMessage(update.Message.Chat.ID)
+			msg = b.registrator.GetFirstMessage(update.Message)
 			b.waitConversation[update.Message.Chat.ID] = Conversation{
 				typeOfConversation: rigesterType,
 				step:               1,
@@ -120,7 +118,7 @@ func (b *TelegramBot) Run() {
 			b.sendMessage(msg)
 			continue
 		case helpCommand:
-			msg = commands.GetHelpMessage(update.Message)	
+			msg = commands.GetHelpMessage(update.Message)
 		default:
 			msg.Text = "I don't know that command"
 		}

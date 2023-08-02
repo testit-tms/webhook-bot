@@ -74,7 +74,7 @@ func (r *ChatStorage) AddChat(ctx context.Context, chat entities.Chat) (entities
 	return newChat, nil
 }
 
-func (r *ChatStorage) DeleteChatById(ctx context.Context, id int) error {
+func (r *ChatStorage) DeleteChatById(ctx context.Context, id int64) error {
 	const op = "storage.postgres.DeleteChatById"
 
 	_, err := r.db.ExecContext(ctx, deleteChatById, id)

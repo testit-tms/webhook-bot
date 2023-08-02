@@ -54,7 +54,8 @@ func Test_chatUsecases_AddChat(t *testing.T) {
 			chatMock := mocks.NewMockchatsStorage(mockCtrl)
 			chatMock.EXPECT().AddChat(gomock.Any(), tt.chat).Return(tt.want, tt.wantError)
 
-			u := NewChatUsecases(chatMock)
+			companyMock := mocks.NewMockcompanyStorage(mockCtrl)
+			u := NewChatUsecases(chatMock, companyMock)
 
 			got, err := u.AddChat(context.Background(), tt.chat)
 			if err != nil {
