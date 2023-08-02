@@ -18,6 +18,7 @@ const (
 	getMyCompanies  = "list"
 	addChat         = "add"
 	helpCommand     = "help"
+	deleteChat      = "delete"
 )
 
 type registrator interface {
@@ -31,6 +32,7 @@ type companyCommands interface {
 
 type chatCommands interface {
 	AddChat(m *tgbotapi.Message) (tgbotapi.MessageConfig, error)
+	DeleteChat(m *tgbotapi.Message) (tgbotapi.MessageConfig, error)
 }
 
 type TelegramBot struct {
@@ -114,6 +116,13 @@ func (b *TelegramBot) Run() {
 			msg, err := b.chc.AddChat(update.Message)
 			if err != nil {
 				b.logger.Error("cannot add chat", sl.Err(err))
+			}
+			b.sendMessage(msg)
+			continue
+		case deleteChat:
+			msg, err := b.chc.DeleteChat(update.Message)
+			if err != nil {
+				b.logger.Error("cannot delete chat", sl.Err(err))
 			}
 			b.sendMessage(msg)
 			continue

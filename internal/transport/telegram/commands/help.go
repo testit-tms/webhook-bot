@@ -12,5 +12,6 @@ func GetHelpMessage(m *tgbotapi.Message) tgbotapi.MessageConfig {
 	/register - register new company
 	/list - show registered company
 	/add {chat_id} - add chat to company, for example: /add 123456789
+	/delete {chat_id} - delete chat from company, for example: /delete 123456789
 	`)
 }
