@@ -28,7 +28,7 @@ func New(log *slog.Logger, sender sender) http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
-		token := r.Header.Get("Autorization")
+		token := r.Header.Get("Authorization")
 		if token == "" {
 			log.Debug("token not found")
 			handlers.NewErrorResponse(w, http.StatusUnauthorized, "token is required")

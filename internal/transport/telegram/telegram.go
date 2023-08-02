@@ -1,6 +1,8 @@
 package telegram
 
 import (
+	"context"
+	"fmt"
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -12,9 +14,10 @@ import (
 
 const (
 	rigesterCommand = "register"
-	getChatID       = "get_chat_id"
-	getMyCompanies  = "get_my_companies"
-	addChat         = "add_chat"
+	getChatID       = "show"
+	getMyCompanies  = "list"
+	addChat         = "add"
+	helpCommand     = "help"
 )
 
 type registrator interface {
@@ -116,6 +119,8 @@ func (b *TelegramBot) Run() {
 			}
 			b.sendMessage(msg)
 			continue
+		case helpCommand:
+			msg = commands.GetHelpMessage(update.Message)	
 		default:
 			msg.Text = "I don't know that command"
 		}
@@ -134,16 +139,18 @@ func (b *TelegramBot) sendMessage(m tgbotapi.MessageConfig) {
 	}
 }
 
-func (b *TelegramBot) SendMessage(channelID int64, message entities.Message) error {
-	msg := tgbotapi.NewMessage(channelID, message.Text)
+func (b *TelegramBot) SendMessage(ctx context.Context, msg entities.Message) error {
+	const op = "telegram.SendMessage"
+	for _, chatID := range msg.ChatIds {
+		newMessage := tgbotapi.NewMessage(chatID, msg.Text)
 
-	if message.ParseMode != entities.Undefined {
-		msg.ParseMode = string(message.ParseMode)
+		if msg.ParseMode != entities.Undefined {
+			newMessage.ParseMode = string(msg.ParseMode)
+		}
+
+		if _, err := b.bot.Send(newMessage); err != nil {
+			return fmt.Errorf("%s :cannot send message to chat %d: %w", op, chatID, err)
+		}
 	}
-
-	if _, err := b.bot.Send(msg); err != nil {
-		return err
-	}
-
 	return nil
 }
