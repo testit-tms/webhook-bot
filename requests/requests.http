@@ -1,7 +1,7 @@
 ### Send POST request with json body
 POST http://localhost:8080/telegram
 Content-Type: application/json
-Authorization: E90hr$}E0p)^HR<C@5w>mvWp~uFP9{
+Authorization: AEnoMWhZgaIRLRpbBevCDVVu5HgGyp
 
 {
   "message": "<b>bold</b>, <strong>bold</strong>\nsome text",
@@ -11,7 +11,7 @@ Authorization: E90hr$}E0p)^HR<C@5w>mvWp~uFP9{
 ### Send POST request with json body and chatId (HTML)
 POST http://localhost:8080/telegram
 Content-Type: application/json
-Authorization: E90hr$}E0p)^HR<C@5w>mvWp~uFP9{
+Authorization: AEnoMWhZgaIRLRpbBevCDVVu5HgGyp
 
 {
   "message": "<b>bold</b>, <strong>bold</strong>\nsome text",
