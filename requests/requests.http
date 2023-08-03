@@ -1,0 +1,35 @@
+### Send POST request with json body
+POST http://localhost:8080/telegram
+Content-Type: application/json
+Authorization: AEnoMWhZgaIRLRpbBevCDVVu5HgGyp
+
+{
+  "message": "<b>bold</b>, <strong>bold</strong>\nsome text",
+  "parseMode": "HTML"
+}
+
+### Send POST request with json body and chatId (HTML)
+POST http://localhost:8080/telegram
+Content-Type: application/json
+Authorization: AEnoMWhZgaIRLRpbBevCDVVu5HgGyp
+
+{
+  "message": "<b>bold</b>, <strong>bold</strong>\nsome text",
+  "parseMode": "HTML",
+  "chatIds": [
+    368414991
+  ]
+}
+
+### Send POST request with json body and chatId (MarkdownV2)
+POST http://localhost:8080/telegram
+Content-Type: application/json
+Authorization: tWH1VKGaGdem8RIbumCewKnj3yl1YV
+
+{
+  "message": "*bold*, _italic_ \nsome text",
+  "parseMode": "MarkdownV2",
+  "chatIds": [
+    368414991
+  ]
+}
