@@ -20,9 +20,6 @@ type companyStorage interface {
 	GetCompanyByOwnerTelegramId(ctx context.Context, ownerId int64) (entities.Company, error)
 }
 
-type chatsStorage interface {
-}
-
 var (
 	ErrCompanyAlreadyExists = fmt.Errorf("company already exists")
 )

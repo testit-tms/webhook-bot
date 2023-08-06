@@ -13,6 +13,7 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
+// nolint
 func NewErrorResponse(w http.ResponseWriter, status int, err string) {
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(ErrorResponse{

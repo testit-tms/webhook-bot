@@ -13,12 +13,12 @@ import (
 )
 
 const (
-	rigesterCommand = "register"
-	getChatID       = "show"
-	getMyCompanies  = "list"
-	addChat         = "add"
-	helpCommand     = "help"
-	deleteChat      = "delete"
+	rigesterCommand   = "register"
+	getChatIdCommand  = "getchatid"
+	getCompanyCommand = "getcompany"
+	addChatCommand    = "addchat"
+	helpCommand       = "help"
+	deleteChatCommand = "deletechat"
 )
 
 type registrator interface {
@@ -103,23 +103,23 @@ func (b *TelegramBot) Run() {
 				typeOfConversation: rigesterType,
 				step:               1,
 			}
-		case getChatID:
+		case getChatIdCommand:
 			msg = commands.GetChatId(update.Message)
-		case getMyCompanies:
+		case getCompanyCommand:
 			msg, err := b.cc.GetMyCompanies(update.Message)
 			if err != nil {
 				b.logger.Error("cannot get company", sl.Err(err))
 			}
 			b.sendMessage(msg)
 			continue
-		case addChat:
+		case addChatCommand:
 			msg, err := b.chc.AddChat(update.Message)
 			if err != nil {
 				b.logger.Error("cannot add chat", sl.Err(err))
 			}
 			b.sendMessage(msg)
 			continue
-		case deleteChat:
+		case deleteChatCommand:
 			msg, err := b.chc.DeleteChat(update.Message)
 			if err != nil {
 				b.logger.Error("cannot delete chat", sl.Err(err))

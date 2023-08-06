@@ -8,10 +8,10 @@ func GetHelpMessage(m *tgbotapi.Message) tgbotapi.MessageConfig {
 	return tgbotapi.NewMessage(m.Chat.ID,
 		`Available commands:
 	/help - show this message
-	/show - show chat ID
+	/getchatid - show chat ID
 	/register - register new company
-	/list - show registered company
-	/add {chat_id} - add chat to company, for example: /add 123456789
-	/delete {chat_id} - delete chat from company, for example: /delete 123456789
+	/getcompany - show registered company
+	/addchat {chat_id} - add chat to company, for example: /addchat 123456789
+	/deletechat {chat_id} - delete chat from company, for example: /deletechat 123456789
 	`)
 }
