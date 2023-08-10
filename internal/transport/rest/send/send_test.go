@@ -144,7 +144,7 @@ func TestNew(t *testing.T) {
 			req, err := http.NewRequest(http.MethodPost, "/telegram", bytes.NewReader([]byte(input)))
 			require.NoError(t, err)
 			if tc.token != "" {
-				req.Header.Set("Autorization", tc.token)
+				req.Header.Set("Authorization", tc.token)
 			}
 
 			rr := httptest.NewRecorder()
