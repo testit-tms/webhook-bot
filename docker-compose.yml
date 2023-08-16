@@ -1,0 +1,49 @@
+x-logging:
+  &default-logging
+  driver: "json-file"
+  options:
+    max-size: "500m"
+    max-file: "2"
+
+services:
+  postgres:
+    logging: *default-logging
+    image: postgres:14
+    environment:
+      POSTGRES_DB: "${POSTGRES_DB}"
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    networks:
+      api_network: 
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./migrations/0001_CREATE_TABLES.sql:/docker-entrypoint-initdb.d/0001_CREATE_TABLES.sql
+
+  webhook-bot:
+    logging: *default-logging
+    image: webhook-bot:1.0.0
+    environment: 
+      DB_NAME: "${POSTGRES_DB}"
+      DB_USER: "${POSTGRES_USER}"
+      DB_PASSWORD: "${POSTGRES_PASSWORD}"
+      DB_HOST: "${DB_HOST:-postgres}"
+      DB_PORT: "${DB_PORT:-5432}"
+      LOG_LEVEL: "${LOG_LEVEL:-Info}"
+      BOT_TOKEN: "${BOT_TOKEN}"
+      TIMEOUT: "${TIMEOUT:-4s}"
+      IDLE_TIMEOUT: "${IDLE_TIMEOUT:-60s}"
+    depends_on: 
+      - postgres
+      
+    networks:
+      api_network: 
+    ports: 
+      - 8080:8080
+
+networks:
+  api_network: null
+
+volumes:
+  postgres: null

@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS chats (
 );
 CREATE INDEX index_chat ON chats (company_id);
 -- +goose Down
-DROP INDEX IF EXISTS index_chat;
-DROP TABLE IF EXISTS chats;
-DROP INDEX IF EXISTS index_token;
-DROP TABLE IF EXISTS companies;
-DROP TABLE IF EXISTS owners;
+-- DROP INDEX IF EXISTS index_chat;
+-- DROP TABLE IF EXISTS chats;
+-- DROP INDEX IF EXISTS index_token;
+-- DROP TABLE IF EXISTS companies;
+-- DROP TABLE IF EXISTS owners;

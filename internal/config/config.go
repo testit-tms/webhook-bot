@@ -12,20 +12,20 @@ type Config struct {
 	HTTPServer  `yaml:"http_server"`
 	Database    `yaml:"database"`
 	TelegramBot `yaml:"telegram_bot"`
-	LogLevel    string `yaml:"log_level" env-default:"Info"`
+	LogLevel    string `yaml:"log_level" env-default:"Info" env:"LOG_LEVEL"`
 }
 
 type HTTPServer struct {
 	Address     string        `yaml:"address" env-default:"localhost:8080"`
-	Timeout     time.Duration `yaml:"timeout" env-default:"4s"`
-	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"60s"`
+	Timeout     time.Duration `yaml:"timeout" env-default:"4s" env:"TIMEOUT"`
+	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"60s" env:"IDLE_TIMEOUT"`
 }
 
 type Database struct {
-	Host     string `yaml:"host" env-default:"localhost"`
-	Port     int64  `yaml:"port" env-default:"5432"`
-	DBName   string `yaml:"db_name" env-default:"bot"`
-	User     string `yaml:"user" env-default:"postgres"`
+	Host     string `yaml:"host" env-default:"localhost" env:"DB_HOST"`
+	Port     int64  `yaml:"port" env-default:"5432" env:"DB_PORT"`
+	DBName   string `yaml:"db_name" env-default:"bot" env:"DB_NAME"`
+	User     string `yaml:"user" env-default:"postgres" env:"DB_USER"`
 	Password string `yaml:"password" env-required:"true" env:"DB_PASSWORD"`
 }
 
