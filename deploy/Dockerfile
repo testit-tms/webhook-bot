@@ -14,11 +14,15 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /webhook-bot ./cmd/webhook-bot
 
 FROM alpine:latest
 
+ENV CONFIG_PATH=/app/config.yaml
+
 RUN apk --no-cache add ca-certificates
 
-WORKDIR /root/
+WORKDIR /app
 
 COPY --from=builder /webhook-bot .
+
+COPY ./config/config.yaml .
 
 EXPOSE 8080
 
