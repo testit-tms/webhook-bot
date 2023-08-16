@@ -19,11 +19,11 @@ services:
       - 5432:5432
     volumes:
       - postgres:/var/lib/postgresql/data
-      - ./migrations/0001_CREATE_TABLES.sql:/docker-entrypoint-initdb.d/0001_CREATE_TABLES.sql
+      - ../migrations/0001_CREATE_TABLES.sql:/docker-entrypoint-initdb.d/0001_CREATE_TABLES.sql
 
   webhook-bot:
     logging: *default-logging
-    image: webhook-bot:1.0.0
+    image: webhook-bot:latest
     environment: 
       DB_NAME: "${POSTGRES_DB}"
       DB_USER: "${POSTGRES_USER}"
