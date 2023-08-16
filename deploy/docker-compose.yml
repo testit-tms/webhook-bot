@@ -9,21 +9,24 @@ services:
   postgres:
     logging: *default-logging
     image: postgres:14
+    ports:
+      - 5432:5432
     environment:
       POSTGRES_DB: "${POSTGRES_DB}"
       POSTGRES_USER: "${POSTGRES_USER}"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
-    networks:
-      api_network: 
-    ports:
-      - 5432:5432
     volumes:
       - postgres:/var/lib/postgresql/data
       - ../migrations/0001_CREATE_TABLES.sql:/docker-entrypoint-initdb.d/0001_CREATE_TABLES.sql
+    restart: unless-stopped 
+    networks:
+      api_network:
 
   webhook-bot:
     logging: *default-logging
-    image: webhook-bot:latest
+    image: ${DOCKER_REGISTRY}webhook-bot:${IMAGE_TAG}
+    ports: 
+      - 8080:8080
     environment: 
       DB_NAME: "${POSTGRES_DB}"
       DB_USER: "${POSTGRES_USER}"
@@ -36,11 +39,9 @@ services:
       IDLE_TIMEOUT: "${IDLE_TIMEOUT:-60s}"
     depends_on: 
       - postgres
-      
+    restart: unless-stopped  
     networks:
       api_network: 
-    ports: 
-      - 8080:8080
 
 networks:
   api_network: null
