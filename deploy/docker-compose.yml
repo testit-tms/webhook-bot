@@ -5,9 +5,8 @@ services:
       options:
         fluentd-address: localhost:24224
         tag: webhook
-    image: ${IMAGE_NAME}:${IMAGE_TAG}
-    ports:
-      - 8080:8080
+    #image: ${IMAGE_NAME}:${IMAGE_TAG}
+    image: ${IMAGE_NAME}:00a83b91
     environment:
       DB_NAME:      "${POSTGRES_DB}"
       DB_USER:      "${POSTGRES_USER}"
@@ -18,6 +17,12 @@ services:
       BOT_TOKEN:    "${BOT_TOKEN}"
       TIMEOUT:      "${TIMEOUT:-4s}"
       IDLE_TIMEOUT: "${IDLE_TIMEOUT:-60s}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wh-bot.rule=Host(`webhooks.testit.software`)"
+      - "traefik.http.routers.wh-bot.entrypoints=websecure"
+      - "traefik.http.routers.wh-bot.tls.certresolver=myresolver"
+      - "traefik.http.services.wh-bot.loadbalancer.server.port=8080"
     depends_on:
       - postgres
     restart: unless-stopped
@@ -45,9 +50,33 @@ services:
   fluent-bit:
     image: fluent/fluent-bit
     ports:
-      - 24224:24224
+      - 127.0.0.1:24224:24224
     volumes:
       - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+    networks:
+      api_network:
+
+  traefik:
+    image: "traefik:v2.10"
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+    volumes:
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
       api_network:
 
