@@ -5,15 +5,15 @@ install_deps:
 
 .PHONY: migration_status
 migration_status:
-	goose -dir ./migrations postgres "host=127.0.0.1 port=5432 user=postgres password=Qwerty123 dbname=bot sslmode=disable" status
+	goose -dir ./pkg/database/migrations postgres "host=127.0.0.1 port=5432 user=postgres password=Qwerty123 dbname=bot sslmode=disable" status
 
 .PHONY: migration_up
 migration_up:
-	goose -dir ./migrations postgres "host=127.0.0.1 port=5432 user=postgres password=Qwerty123 dbname=bot sslmode=disable" up
+	goose -dir ./pkg/database/migrations postgres "host=127.0.0.1 port=5432 user=postgres password=Qwerty123 dbname=bot sslmode=disable" up
 
 .PHONY: migration_down
 migration_down:
-	goose -dir ./migrations postgres "host=127.0.0.1 port=5432 user=postgres password=Qwerty123 dbname=bot sslmode=disable" reset		
+	goose -dir ./pkg/database/migrations postgres "host=127.0.0.1 port=5432 user=postgres password=Qwerty123 dbname=bot sslmode=disable" reset		
 
 .PHONY: database_up
 database:
