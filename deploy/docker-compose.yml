@@ -1,3 +1,10 @@
+x-logging:
+  &default-logging
+  driver: "json-file"
+  options:
+    max-size: "500m"
+    max-file: "2"
+
 services:
   webhook-bot:
     logging:
@@ -5,8 +12,7 @@ services:
       options:
         fluentd-address: localhost:24224
         tag: webhook
-    #image: ${IMAGE_NAME}:${IMAGE_TAG}
-    image: ${IMAGE_NAME}:00a83b91
+    image: ${IMAGE_NAME}:${IMAGE_TAG}
     environment:
       DB_NAME:      "${POSTGRES_DB}"
       DB_USER:      "${POSTGRES_USER}"
@@ -19,7 +25,7 @@ services:
       IDLE_TIMEOUT: "${IDLE_TIMEOUT:-60s}"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.wh-bot.rule=Host(`webhooks.testit.software`)"
+      - "traefik.http.routers.wh-bot.rule=Host(`${BOT_URL}`)"
       - "traefik.http.routers.wh-bot.entrypoints=websecure"
       - "traefik.http.routers.wh-bot.tls.certresolver=myresolver"
       - "traefik.http.services.wh-bot.loadbalancer.server.port=8080"
@@ -30,11 +36,7 @@ services:
       api_network:
 
   postgres:
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "500m"
-        max-file: "2"
+    logging: *default-logging
     image: postgres:14
     environment:
       POSTGRES_DB:       "${POSTGRES_DB}"
@@ -42,13 +44,19 @@ services:
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
     volumes:
       - postgres:/var/lib/postgresql/data
-      - ../migrations/0001_CREATE_TABLES.sql:/docker-entrypoint-initdb.d/0001_CREATE_TABLES.sql
     restart: unless-stopped
     networks:
       api_network:
 
   fluent-bit:
     image: fluent/fluent-bit
+    environment:
+      FLUENT_ELASTICSEARCH_TLS_ENABLED: "${FLUENT_ELASTICSEARCH_TLS_ENABLED}"
+      FLUENT_ELASTICSEARCH_INDEX_NAME:  "${FLUENT_ELASTICSEARCH_INDEX_NAME}"
+      FLUENT_ELASTICSEARCH_HOST:        "${FLUENT_ELASTICSEARCH_HOST}"
+      FLUENT_ELASTICSEARCH_PORT:        "${FLUENT_ELASTICSEARCH_PORT}"
+      FLUENT_ELASTICSEARCH_USER:        "${FLUENT_ELASTICSEARCH_USER}"
+      FLUENT_ELASTICSEARCH_PASSWD:      "${FLUENT_ELASTICSEARCH_PASSWD}"
     ports:
       - 127.0.0.1:24224:24224
     volumes:
@@ -57,6 +65,7 @@ services:
       api_network:
 
   traefik:
+    logging: *default-logging
     image: "traefik:v2.10"
     command:
       - "--log.level=DEBUG"
@@ -75,7 +84,7 @@ services:
       - "0.0.0.0:80:80"
       - "0.0.0.0:443:443"
     volumes:
-      - "./letsencrypt:/letsencrypt"
+      - traefik_letsencrypt:/letsencrypt
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
       api_network:
@@ -85,3 +94,4 @@ networks:
 
 volumes:
   postgres: null
+  traefik_letsencrypt: null
