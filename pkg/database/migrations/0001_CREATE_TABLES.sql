@@ -12,14 +12,14 @@ CREATE TABLE IF NOT EXISTS companies (
     email varchar (250) NOT NULL,
     CONSTRAINT fk_owner FOREIGN KEY(owner_id) REFERENCES owners(id)
 );
-CREATE INDEX index_token ON companies (token);
+CREATE INDEX IF NOT EXISTS index_token ON companies (token);
 CREATE TABLE IF NOT EXISTS chats (
     id SERIAL PRIMARY KEY NOT NULL,
     company_id INT NOT NULL,
     telegram_id INT NOT NULL,
     CONSTRAINT fk_company FOREIGN KEY(company_id) REFERENCES companies(id)
 );
-CREATE INDEX index_chat ON chats (company_id);
+CREATE INDEX IF NOT EXISTS index_chat ON chats (company_id);
 
 -- +goose Down
 DROP INDEX IF EXISTS index_chat;
