@@ -6,45 +6,92 @@ x-logging:
     max-file: "2"
 
 services:
-  postgres:
-    logging: *default-logging
-    image: postgres:14
-    ports:
-      - 5432:5432
+  webhook-bot:
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: webhook
+    image: ${IMAGE_NAME}:${IMAGE_TAG}
     environment:
-      POSTGRES_DB: "${POSTGRES_DB}"
-      POSTGRES_USER: "${POSTGRES_USER}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
-    volumes:
-      - postgres:/var/lib/postgresql/data
-      - ../migrations/0001_CREATE_TABLES.sql:/docker-entrypoint-initdb.d/0001_CREATE_TABLES.sql
-    restart: unless-stopped 
+      DB_NAME:      "${POSTGRES_DB}"
+      DB_USER:      "${POSTGRES_USER}"
+      DB_PASSWORD:  "${POSTGRES_PASSWORD}"
+      DB_HOST:      "${DB_HOST:-postgres}"
+      DB_PORT:      "${DB_PORT:-5432}"
+      LOG_LEVEL:    "${LOG_LEVEL:-Info}"
+      BOT_TOKEN:    "${BOT_TOKEN}"
+      TIMEOUT:      "${TIMEOUT:-4s}"
+      IDLE_TIMEOUT: "${IDLE_TIMEOUT:-60s}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wh-bot.rule=Host(`${BOT_URL}`)"
+      - "traefik.http.routers.wh-bot.entrypoints=websecure"
+      - "traefik.http.routers.wh-bot.tls.certresolver=myresolver"
+      - "traefik.http.services.wh-bot.loadbalancer.server.port=8080"
+    depends_on:
+      - postgres
+    restart: unless-stopped
     networks:
       api_network:
 
-  webhook-bot:
+  postgres:
     logging: *default-logging
-    image: ${DOCKER_REGISTRY}webhook-bot:${IMAGE_TAG}
-    ports: 
-      - 8080:8080
-    environment: 
-      DB_NAME: "${POSTGRES_DB}"
-      DB_USER: "${POSTGRES_USER}"
-      DB_PASSWORD: "${POSTGRES_PASSWORD}"
-      DB_HOST: "${DB_HOST:-postgres}"
-      DB_PORT: "${DB_PORT:-5432}"
-      LOG_LEVEL: "${LOG_LEVEL:-Info}"
-      BOT_TOKEN: "${BOT_TOKEN}"
-      TIMEOUT: "${TIMEOUT:-4s}"
-      IDLE_TIMEOUT: "${IDLE_TIMEOUT:-60s}"
-    depends_on: 
-      - postgres
-    restart: unless-stopped  
+    image: postgres:14
+    environment:
+      POSTGRES_DB:       "${POSTGRES_DB}"
+      POSTGRES_USER:     "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    restart: unless-stopped
     networks:
-      api_network: 
+      api_network:
+
+  fluent-bit:
+    image: fluent/fluent-bit
+    environment:
+      FLUENT_ELASTICSEARCH_TLS_ENABLED: "${FLUENT_ELASTICSEARCH_TLS_ENABLED}"
+      FLUENT_ELASTICSEARCH_INDEX_NAME:  "${FLUENT_ELASTICSEARCH_INDEX_NAME}"
+      FLUENT_ELASTICSEARCH_HOST:        "${FLUENT_ELASTICSEARCH_HOST}"
+      FLUENT_ELASTICSEARCH_PORT:        "${FLUENT_ELASTICSEARCH_PORT}"
+      FLUENT_ELASTICSEARCH_USER:        "${FLUENT_ELASTICSEARCH_USER}"
+      FLUENT_ELASTICSEARCH_PASSWD:      "${FLUENT_ELASTICSEARCH_PASSWD}"
+    ports:
+      - 127.0.0.1:24224:24224
+    volumes:
+      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+    networks:
+      api_network:
+
+  traefik:
+    logging: *default-logging
+    image: "traefik:v2.10"
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+    volumes:
+      - traefik_letsencrypt:/letsencrypt
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      api_network:
 
 networks:
   api_network: null
 
 volumes:
   postgres: null
+  traefik_letsencrypt: null

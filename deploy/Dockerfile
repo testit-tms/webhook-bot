@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /webhook-bot ./cmd/webhook-bot
+RUN CGO_ENABLED=0 GOOS=linux go build -buildvcs=false -o /webhook-bot ./cmd/webhook-bot
 
 
 
