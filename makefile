@@ -19,6 +19,11 @@ migration_down:
 run:
 	docker-compose -f deploy/docker-compose.yml -p webhook_bot up -d
 
+.PHONY: build_run
+build_run:
+	make docker_build
+	make run
+
 .PHONY: stop
 stop:
 	docker-compose -f deploy/docker-compose.yml -p webhook_bot down
