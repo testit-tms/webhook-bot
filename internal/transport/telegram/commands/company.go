@@ -64,7 +64,7 @@ func (c *CompanyCommands) GetMyCompanies(m *tgbotapi.Message) (tgbotapi.MessageC
 }
 
 func replaceSpecialCharacters(str string) string {
-	for _, char := range []string{"-", "[", "]", "(", ")", "~", "`", ">", "#", "+", "=", "|", "{", "}", ".", "!"} {
+	for _, char := range []string{"_", "*", "[", "]", "(", ")", "~", "`", ">", "#", "+", "-", "=", "|", "{", "}", ".", "!"} {
 		str = strings.Replace(str, char, "\\"+char, -1)
 	}
 	return str
