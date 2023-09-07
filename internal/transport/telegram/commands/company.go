@@ -51,7 +51,7 @@ func (c *CompanyCommands) GetMyCompanies(m *tgbotapi.Message) (tgbotapi.MessageC
 		*Name:*  _%s_ 
 		*Email:* _%s_
 		*Token:* _%s_
-		`, company.Name, strings.Replace(company.Email, ".", "\\.", -1), company.Token)
+		`, replaceSpecialCharacters(company.Name), strings.Replace(company.Email, ".", "\\.", -1), company.Token)
 
 	if len(company.ChatIds) > 0 {
 		msg.Text += "\n*Chats:*"
@@ -61,4 +61,11 @@ func (c *CompanyCommands) GetMyCompanies(m *tgbotapi.Message) (tgbotapi.MessageC
 	}
 
 	return msg, nil
+}
+
+func replaceSpecialCharacters(str string) string {
+	for _, char := range []string{"-", "[", "]", "(", ")", "~", "`", ">", "#", "+", "=", "|", "{", "}", ".", "!"} {
+		str = strings.Replace(str, char, "\\"+char, -1)
+	}
+	return str
 }
