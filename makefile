@@ -15,9 +15,13 @@ migration_up:
 migration_down:
 	goose -dir ./pkg/database/migrations postgres "host=127.0.0.1 port=5432 user=postgres password=Qwerty123 dbname=bot sslmode=disable" reset		
 
-.PHONY: database_up
-database:
+.PHONY: run
+run:
 	docker-compose -f deploy/docker-compose.yml -p webhook_bot up -d
+
+.PHONY: stop
+stop:
+	docker-compose -f deploy/docker-compose.yml -p webhook_bot down
 
 .PHONY: test
 test:
@@ -31,3 +35,7 @@ coverage:
 .PHONY: lint
 lint:
 	golangci-lint run
+
+.PHONY: docker_build
+docker_build:
+	docker build -f deploy/Dockerfile -t webhook-bot:0.1.0 .

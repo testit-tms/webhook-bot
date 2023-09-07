@@ -19,6 +19,7 @@ const (
 	addChatCommand    = "addchat"
 	helpCommand       = "help"
 	deleteChatCommand = "deletechat"
+	startCommand      = "start"
 )
 
 type registrator interface {
@@ -97,6 +98,10 @@ func (b *TelegramBot) Run() {
 
 		// Extract the command from the Message.
 		switch update.Message.Command() {
+		case helpCommand:
+			msg = commands.GetHelpMessage(update.Message)
+		case startCommand:
+			msg = commands.GetStartMessage(update.Message)
 		case rigesterCommand:
 			msg = b.registrator.GetFirstMessage(update.Message)
 			b.waitConversation[update.Message.Chat.ID] = Conversation{
@@ -126,8 +131,6 @@ func (b *TelegramBot) Run() {
 			}
 			b.sendMessage(msg)
 			continue
-		case helpCommand:
-			msg = commands.GetHelpMessage(update.Message)
 		default:
 			msg.Text = "I don't know that command"
 		}
