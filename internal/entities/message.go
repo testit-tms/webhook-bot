@@ -42,7 +42,7 @@ func (pm ParseMode) String() string {
 func ParseString(str string) ParseMode {
 	c, ok := parseModeMap[strings.ToLower(str)]
 	if !ok {
-		return MarkdownV2
+		return Undefined
 	}
 
 	return c
