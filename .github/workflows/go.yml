@@ -14,7 +14,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        path: pr
+    - name: Checkout base code
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.base.sha }}
+        path: base
 
     - name: Set up Go
       uses: actions/setup-go@v4
@@ -43,14 +51,17 @@ jobs:
           ${{ steps.loc.outputs.diff }}
 
     - name: Build
+      working-directory: ./pr
       run: go build -v ./...
 
     - name: Lint
       uses: golangci/golangci-lint-action@v3
       with:
         version: latest
+        working-directory: ./pr
 
     - name: Test
+      working-directory: ./pr
       run: go test -v ./... -coverprofile=./cover.out
     
     - name: check test coverage
