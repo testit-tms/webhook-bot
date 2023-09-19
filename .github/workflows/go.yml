@@ -91,6 +91,7 @@ jobs:
     - name: Annotate missing test coverage
       id: annotate
       if: github.event.pull_request.base.sha != ''
+      working-directory: ./pr
       run: |
         curl -sLO https://github.com/vearutop/gocovdiff/releases/download/v1.4.0/linux_amd64.tar.gz && tar xf linux_amd64.tar.gz && rm linux_amd64.tar.gz
         gocovdiff_hash=$(git hash-object ./gocovdiff)
@@ -99,7 +100,7 @@ jobs:
         REP=$(./gocovdiff -mod github.com/$GITHUB_REPOSITORY -cov unit.coverprofile -gha-annotations gha-unit.txt -delta-cov-file delta-cov-unit.txt -target-delta-cov ${TARGET_DELTA_COV})
         echo "${REP}"
         cat gha-unit.txt
-        DIFF=$(test -e ./base/unit-base.txt && ./gocovdiff -mod github.com/$GITHUB_REPOSITORY -func-cov ./pr/unit.txt -func-base-cov unit-base.txt || echo "Missing base coverage file")
+        DIFF=$(test -e ../base/unit-base.txt && ./gocovdiff -mod github.com/$GITHUB_REPOSITORY -func-cov unit.txt -func-base-cov unit-base.txt || echo "Missing base coverage file")
         TOTAL=$(cat delta-cov-unit.txt)
         echo "rep<<EOF" >> $GITHUB_OUTPUT && echo "$REP" >> $GITHUB_OUTPUT && echo "EOF" >> $GITHUB_OUTPUT
         echo "diff<<EOF" >> $GITHUB_OUTPUT && echo "$DIFF" >> $GITHUB_OUTPUT && echo "EOF" >> $GITHUB_OUTPUT
