@@ -130,10 +130,11 @@ jobs:
 
     - name: Store base coverage
       if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
+      working-directory: ./pr
       run: cp unit.txt unit-base.txt
 
     - name: Upload code coverage
       uses: codecov/codecov-action@v1
       with:
-        file: ./unit.coverprofile
+        file: ./pr/unit.coverprofile
         flags: unittests
