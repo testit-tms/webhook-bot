@@ -9,8 +9,10 @@ on:
   pull_request:
     branches: [ "main" ]
 
-jobs:
+env:
+  TARGET_DELTA_COV: 90  
 
+jobs:
   build:
     runs-on: ubuntu-latest
     steps:
@@ -27,7 +29,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.20'
+        go-version: '1.21'
 
     - name: Count lines of code
       id: loc
@@ -60,15 +62,77 @@ jobs:
         version: latest
         working-directory: ./pr
 
-    - name: Test
-      working-directory: ./pr
-      run: go test -v ./... -coverprofile=./cover.out
-    
-    - name: check test coverage
-      uses: vladopajic/go-test-coverage@v2
+    - name: Restore base test coverage
+      id: base-coverage
+      if: github.event.pull_request.base.sha != ''
+      uses: actions/cache@v2
       with:
-        profile: cover.out
-        local-prefix: github.com/testit-tms/webhook-bot
-        threshold-file: 80
-        threshold-package: 80
-        threshold-total: 95 
+        path: |
+          unit-base.txt
+        # Use base sha for PR or new commit hash for master/main push in test result key.
+        key: ${{ runner.os }}-unit-test-coverage-${{ (github.event.pull_request.base.sha != github.event.after) && github.event.pull_request.base.sha || github.event.after }}    
+
+    - name: Run test for base code
+      if: steps.base-coverage.outputs.cache-hit != 'true' && github.event.pull_request.base.sha != ''
+      working-directory: ./base
+      run: |
+        (go test -short -coverprofile=unit.coverprofile -covermode=atomic -race ./... && go tool cover -func=./unit.coverprofile > unit-base.txt) || echo "No test-unit in base"
+
+    - name: Test
+      id: test
+      run: |
+        go test -short -coverprofile=unit.coverprofile -covermode=atomic -race ./...
+        go tool cover -func=./unit.coverprofile > unit.txt
+        TOTAL=$(grep 'total:' unit.txt)
+        echo "${TOTAL}"
+        echo "total=$TOTAL" >> $GITHUB_OUTPUT    
+
+    - name: Annotate missing test coverage
+      id: annotate
+      if: github.event.pull_request.base.sha != ''
+      run: |
+        curl -sLO https://github.com/vearutop/gocovdiff/releases/download/v1.4.0/linux_amd64.tar.gz && tar xf linux_amd64.tar.gz && rm linux_amd64.tar.gz
+        gocovdiff_hash=$(git hash-object ./gocovdiff)
+        [ "$gocovdiff_hash" == "f191b45548bb65ec2c7d88909679a57116ff1ba1" ] || (echo "::error::unexpected hash for gocovdiff, possible tampering: $gocovdiff_hash" && exit 1)
+        git fetch origin master ${{ github.event.pull_request.base.sha }}
+        REP=$(./gocovdiff -mod github.com/$GITHUB_REPOSITORY -cov unit.coverprofile -gha-annotations gha-unit.txt -delta-cov-file delta-cov-unit.txt -target-delta-cov ${TARGET_DELTA_COV})
+        echo "${REP}"
+        cat gha-unit.txt
+        DIFF=$(test -e unit-base.txt && ./gocovdiff -mod github.com/$GITHUB_REPOSITORY -func-cov unit.txt -func-base-cov unit-base.txt || echo "Missing base coverage file")
+        TOTAL=$(cat delta-cov-unit.txt)
+        echo "rep<<EOF" >> $GITHUB_OUTPUT && echo "$REP" >> $GITHUB_OUTPUT && echo "EOF" >> $GITHUB_OUTPUT
+        echo "diff<<EOF" >> $GITHUB_OUTPUT && echo "$DIFF" >> $GITHUB_OUTPUT && echo "EOF" >> $GITHUB_OUTPUT
+        echo "total<<EOF" >> $GITHUB_OUTPUT && echo "$TOTAL" >> $GITHUB_OUTPUT && echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Comment test coverage
+      continue-on-error: true
+      if: github.event.pull_request.base.sha != ''
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        header: unit-test
+        message: |
+          ### Unit Test Coverage
+          ${{ steps.test.outputs.total }}
+          ${{ steps.annotate.outputs.total }}
+          <details><summary>Coverage of changed lines</summary>
+          
+          ${{ steps.annotate.outputs.rep }}
+
+          </details>
+
+          <details><summary>Coverage diff with base branch</summary>
+
+          ${{ steps.annotate.outputs.diff }}
+          
+          </details>
+
+    - name: Store base coverage
+      if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
+      run: cp unit.txt unit-base.txt
+
+    - name: Upload code coverage
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./unit.coverprofile
+        flags: unittests
