@@ -159,6 +159,7 @@ func (b *TelegramBot) SendMessage(ctx context.Context, msg entities.Message) err
 		}
 
 		if _, err := b.bot.Send(newMessage); err != nil {
+			b.logger.Error("cannot send message", sl.Err(err), slog.String("op", op), slog.Int64("chatID", chatID), slog.String("text", msg.Text))
 			return fmt.Errorf("%s :cannot send message to chat %d: %w", op, chatID, err)
 		}
 	}
