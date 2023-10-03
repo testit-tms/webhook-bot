@@ -2,6 +2,7 @@ package send
 
 import "github.com/testit-tms/webhook-bot/internal/entities"
 
+// Request represents a request to send a message.
 type Request struct {
 	Message   string  `json:"message" validate:"required"`
 	ParseMode string  `json:"parseMode,omitempty" validate:"parse-mode"`

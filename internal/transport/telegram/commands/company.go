@@ -14,10 +14,12 @@ type companyUsesaces interface {
 	GetCompanyByOwnerTelegramId(ctx context.Context, ownerId int64) (entities.CompanyInfo, error)
 }
 
+// CompanyCommands represents a set of commands related to companies.
 type CompanyCommands struct {
 	cu companyUsesaces
 }
 
+// NewCompanyCommands creates a new instance of CompanyCommands with the provided company use cases.
 func NewCompanyCommands(cu companyUsesaces) *CompanyCommands {
 	return &CompanyCommands{
 		cu: cu,
@@ -25,6 +27,10 @@ func NewCompanyCommands(cu companyUsesaces) *CompanyCommands {
 }
 
 // TODO: rename to GetMyCompany and refactor
+
+// GetMyCompanies returns a Telegram message containing information about the company owned by the user who sent the message.
+// If the user does not own any companies, the message will indicate that they have no companies and provide a command to register a new one.
+// If an error occurs while retrieving the company information, an error message will be returned.
 func (c *CompanyCommands) GetMyCompanies(m *tgbotapi.Message) (tgbotapi.MessageConfig, error) {
 	const op = "CompanyCommands.GetMyCompanies"
 

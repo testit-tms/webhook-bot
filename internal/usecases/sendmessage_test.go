@@ -37,8 +37,8 @@ func Test_sendMessageUsacases_SendMessage(t *testing.T) {
 			mockChatEntities: []entities.Chat{
 				{
 					Id:         1,
-					TelegramId: 123,
-					CompanyId:  12,
+					TelegramID: 123,
+					CompanyID:  12,
 				},
 			},
 			mockChatError: nil,
@@ -108,8 +108,8 @@ func Test_sendMessageUsacases_SendMessage(t *testing.T) {
 			mockChatEntities: []entities.Chat{
 				{
 					Id:         1,
-					TelegramId: 123,
-					CompanyId:  12,
+					TelegramID: 123,
+					CompanyID:  12,
 				},
 			},
 			mockChatError: nil,
@@ -135,8 +135,8 @@ func Test_sendMessageUsacases_SendMessage(t *testing.T) {
 			mockChatEntities: []entities.Chat{
 				{
 					Id:         1,
-					TelegramId: 123,
-					CompanyId:  12,
+					TelegramID: 123,
+					CompanyID:  12,
 				},
 			},
 			mockChatError: nil,
@@ -163,8 +163,8 @@ func Test_sendMessageUsacases_SendMessage(t *testing.T) {
 			mockChatEntities: []entities.Chat{
 				{
 					Id:         1,
-					TelegramId: 123,
-					CompanyId:  12,
+					TelegramID: 123,
+					CompanyID:  12,
 				},
 			},
 			mockChatError: nil,
@@ -191,8 +191,8 @@ func Test_sendMessageUsacases_SendMessage(t *testing.T) {
 			mockChatEntities: []entities.Chat{
 				{
 					Id:         1,
-					TelegramId: 123,
-					CompanyId:  12,
+					TelegramID: 123,
+					CompanyID:  12,
 				},
 			},
 			mockChatError: nil,

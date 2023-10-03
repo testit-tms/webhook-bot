@@ -8,6 +8,9 @@ import (
 	"golang.org/x/exp/slog"
 )
 
+// New creates a new logger instance with the specified log level.
+// The log level should be one of "debug", "info", "warn", or "error".
+// Returns a pointer to the logger instance and an error if the log level is invalid.
 func New(level string) (*slog.Logger, error) {
 	logLevel, err := getLogLevel(level)
 	if err != nil {

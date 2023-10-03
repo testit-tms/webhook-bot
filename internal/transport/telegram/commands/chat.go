@@ -19,6 +19,7 @@ type chatCommands struct {
 	compu companyUsesaces
 }
 
+// NewChatCommands returns a new instance of chatCommands with the provided chatUsecases and companyUsesaces.
 func NewChatCommands(cu chatUsecases, compu companyUsesaces) *chatCommands {
 	return &chatCommands{
 		cu:    cu,
@@ -26,6 +27,12 @@ func NewChatCommands(cu chatUsecases, compu companyUsesaces) *chatCommands {
 	}
 }
 
+// AddChat adds a new chat to the company with the owner's Telegram ID.
+// It takes a Telegram message as input and extracts the chat ID from the command arguments.
+// If the chat ID is not a valid integer, it returns an error.
+// It then retrieves the company associated with the owner's Telegram ID and adds the chat to the company.
+// If there is an error while adding the chat, it returns an error.
+// Otherwise, it returns a success message.
 func (c *chatCommands) AddChat(m *tgbotapi.Message) (tgbotapi.MessageConfig, error) {
 	const op = "chatCommands.AddChat"
 
@@ -43,8 +50,8 @@ func (c *chatCommands) AddChat(m *tgbotapi.Message) (tgbotapi.MessageConfig, err
 	}
 
 	_, err = c.cu.AddChat(context.Background(), entities.Chat{
-		CompanyId:  company.Id,
-		TelegramId: int64(chatID),
+		CompanyID:  company.ID,
+		TelegramID: int64(chatID),
 	})
 	if err != nil {
 		return tgbotapi.NewMessage(m.Chat.ID, "Something went wrong. Lets try again"),
@@ -54,6 +61,11 @@ func (c *chatCommands) AddChat(m *tgbotapi.Message) (tgbotapi.MessageConfig, err
 	return tgbotapi.NewMessage(m.Chat.ID, "Chat added"), nil
 }
 
+// DeleteChat deletes a chat by its ID. It takes a Telegram message as input and extracts the chat ID from the command arguments.
+// It then calls the DeleteChatByTelegramId method of the ChatUseCase to delete the chat from the database.
+// If the chat ID is not a valid integer, it returns an error and a message to the user.
+// If there is an error deleting the chat, it returns an error and a message to the user.
+// Otherwise, it returns a success message to the user.
 func (c *chatCommands) DeleteChat(m *tgbotapi.Message) (tgbotapi.MessageConfig, error) {
 	const op = "chatCommands.DeleteChat"
 

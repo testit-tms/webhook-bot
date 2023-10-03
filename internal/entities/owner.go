@@ -1,12 +1,14 @@
 package entities
 
+// Owner represents the owner of a company.
 type Owner struct {
-	Id           int64  `db:"id"`
-	TelegramId   int64  `db:"telegram_id"`
+	ID           int64  `db:"id"`
+	TelegramID   int64  `db:"telegram_id"`
 	TelegramName string `db:"telegram_name"`
 }
 
+// OwnerInfo represents information about the owner of a company.
 type OwnerInfo struct {
-	TelegramId   int64
+	TelegramID   int64
 	TelegramName string
 }

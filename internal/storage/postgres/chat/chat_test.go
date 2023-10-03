@@ -25,13 +25,13 @@ func TestChatStorage_GetChatsByCompanyId(t *testing.T) {
 		chatsExp := []entities.Chat{
 			{
 				Id:         12,
-				CompanyId:  id,
-				TelegramId: 123456,
+				CompanyID:  id,
+				TelegramID: 123456,
 			},
 			{
 				Id:         13,
-				CompanyId:  id,
-				TelegramId: 654321,
+				CompanyID:  id,
+				TelegramID: 654321,
 			},
 		}
 
@@ -106,13 +106,13 @@ func TestChatStorage_GetChatsByCompanyToken(t *testing.T) {
 		chatsExp := []entities.Chat{
 			{
 				Id:         12,
-				CompanyId:  21,
-				TelegramId: 123456,
+				CompanyID:  21,
+				TelegramID: 123456,
 			},
 			{
 				Id:         13,
-				CompanyId:  21,
-				TelegramId: 654321,
+				CompanyID:  21,
+				TelegramID: 654321,
 			},
 		}
 
@@ -184,14 +184,14 @@ func TestChatStorage_AddChat(t *testing.T) {
 		defer f.Teardown()
 		expectedChat := entities.Chat{
 			Id:         12,
-			CompanyId:  21,
-			TelegramId: 123456,
+			CompanyID:  21,
+			TelegramID: 123456,
 		}
 		rows := sqlmock.NewRows([]string{"id", "company_id", "telegram_id"}).
 			AddRow(12, 21, "123456")
 
 		f.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO chats (company_id, telegram_id) VALUES ($1, $2) RETURNING id, company_id, telegram_id")).
-			WithArgs(expectedChat.CompanyId, expectedChat.TelegramId).
+			WithArgs(expectedChat.CompanyID, expectedChat.TelegramID).
 			WillReturnRows(rows)
 
 		repo := New(f.DB)
@@ -213,12 +213,12 @@ func TestChatStorage_AddChat(t *testing.T) {
 		expectErr := errors.New("test error")
 		expectedChat := entities.Chat{
 			Id:         12,
-			CompanyId:  21,
-			TelegramId: 123456,
+			CompanyID:  21,
+			TelegramID: 123456,
 		}
 
 		f.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO chats (company_id, telegram_id) VALUES ($1, $2) RETURNING id, company_id, telegram_id")).
-			WithArgs(expectedChat.CompanyId, expectedChat.TelegramId).
+			WithArgs(expectedChat.CompanyID, expectedChat.TelegramID).
 			WillReturnError(expectErr)
 
 		repo := New(f.DB)

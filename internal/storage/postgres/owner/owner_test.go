@@ -23,8 +23,8 @@ func TestOwnerStorage_GetOwnerById(t *testing.T) {
 
 		var id int64 = 12
 		ownerExp := entities.Owner{
-			Id:           id,
-			TelegramId:   123456,
+			ID:           id,
+			TelegramID:   123456,
 			TelegramName: "Mega Owner",
 		}
 
@@ -96,8 +96,8 @@ func TestOwnerStorage_GetOwnerByTelegramId(t *testing.T) {
 
 		var id int64 = 123456
 		ownerExp := entities.Owner{
-			Id:           12,
-			TelegramId:   id,
+			ID:           12,
+			TelegramID:   id,
 			TelegramName: "Mega Owner",
 		}
 
@@ -167,15 +167,15 @@ func TestOwnerStorage_AddOwner(t *testing.T) {
 		f := database.NewFixture(t)
 		defer f.Teardown()
 		expectedOwner := entities.Owner{
-			Id:           12,
-			TelegramId:   123456,
+			ID:           12,
+			TelegramID:   123456,
 			TelegramName: "MyName",
 		}
 		rows := sqlmock.NewRows([]string{"id", "telegram_id", "telegram_name"}).
 			AddRow(12, "123456", "MyName")
 
 		f.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO owners (telegram_id, telegram_name) VALUES ($1, $2) RETURNING id, telegram_id, telegram_name")).
-			WithArgs(expectedOwner.TelegramId, expectedOwner.TelegramName).
+			WithArgs(expectedOwner.TelegramID, expectedOwner.TelegramName).
 			WillReturnRows(rows)
 
 		repo := New(f.DB)
@@ -196,13 +196,13 @@ func TestOwnerStorage_AddOwner(t *testing.T) {
 
 		expectErr := errors.New("test error")
 		expectedOwner := entities.Owner{
-			Id:           12,
-			TelegramId:   123456,
+			ID:           12,
+			TelegramID:   123456,
 			TelegramName: "MyName",
 		}
 
 		f.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO owners (telegram_id, telegram_name) VALUES ($1, $2) RETURNING id, telegram_id, telegram_name")).
-			WithArgs(expectedOwner.TelegramId, expectedOwner.TelegramName).
+			WithArgs(expectedOwner.TelegramID, expectedOwner.TelegramName).
 			WillReturnError(expectErr)
 
 		repo := New(f.DB)
@@ -222,7 +222,7 @@ func TestOwnerStorage_DeleteOwnerById(t *testing.T) {
 		t.Parallel()
 		f := database.NewFixture(t)
 		defer f.Teardown()
-		
+
 		var id int64 = 12
 
 		f.Mock.ExpectExec(regexp.QuoteMeta("DELETE FROM owners WHERE id=$1")).
@@ -232,7 +232,7 @@ func TestOwnerStorage_DeleteOwnerById(t *testing.T) {
 		repo := New(f.DB)
 
 		// Act
-		err := repo.DeleteOwnerById(context.Background(), id)
+		err := repo.DeleteOwnerByID(context.Background(), id)
 
 		// Assert
 		assert.NoError(t, err)
@@ -254,7 +254,7 @@ func TestOwnerStorage_DeleteOwnerById(t *testing.T) {
 		repo := New(f.DB)
 
 		// Act
-		err := repo.DeleteOwnerById(context.Background(), id)
+		err := repo.DeleteOwnerByID(context.Background(), id)
 
 		// Assert
 		assert.ErrorIs(t, err, expectErr)

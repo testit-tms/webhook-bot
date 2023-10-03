@@ -21,9 +21,9 @@ func TestCompanyStorage_AddCompany(t *testing.T) {
 		f := database.NewFixture(t)
 		defer f.Teardown()
 		expectedCompany := entities.Company{
-			Id:      12,
+			ID:      12,
 			Token:   "bguFFFTF&ffdR9*9u",
-			OwnerId: 21,
+			OwnerID: 21,
 			Name:    "MyCompany",
 			Email:   "info@google.com",
 		}
@@ -31,7 +31,7 @@ func TestCompanyStorage_AddCompany(t *testing.T) {
 			AddRow(12, "bguFFFTF&ffdR9*9u", 21, "MyCompany", "info@google.com")
 
 		f.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO companies (token, owner_id, name, email) VALUES ($1, $2, $3, $4) RETURNING id, token, owner_id, name, email")).
-			WithArgs(expectedCompany.Token, expectedCompany.OwnerId, expectedCompany.Name, expectedCompany.Email).
+			WithArgs(expectedCompany.Token, expectedCompany.OwnerID, expectedCompany.Name, expectedCompany.Email).
 			WillReturnRows(rows)
 
 		repo := New(f.DB)
@@ -52,15 +52,15 @@ func TestCompanyStorage_AddCompany(t *testing.T) {
 
 		expectErr := errors.New("test error")
 		expectedCompany := entities.Company{
-			Id:      12,
+			ID:      12,
 			Token:   "bguFFFTF&ffdR9*9u",
-			OwnerId: 21,
+			OwnerID: 21,
 			Name:    "MyCompany",
 			Email:   "info@google.com",
 		}
 
 		f.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO companies (token, owner_id, name, email) VALUES ($1, $2, $3, $4) RETURNING id, token, owner_id, name, email")).
-			WithArgs(expectedCompany.Token, expectedCompany.OwnerId, expectedCompany.Name, expectedCompany.Email).
+			WithArgs(expectedCompany.Token, expectedCompany.OwnerID, expectedCompany.Name, expectedCompany.Email).
 			WillReturnError(expectErr)
 
 		repo := New(f.DB)
@@ -83,8 +83,8 @@ func TestCompanyStorage_GetCompanyByOwnerTelegramId(t *testing.T) {
 
 		var id int64 = 21
 		companyExp := entities.Company{
-			Id:      12,
-			OwnerId: 13,
+			ID:      12,
+			OwnerID: 13,
 			Token:   "bguFFFTF&ffdR9*9u",
 			Name:    "MyCompany",
 			Email:   "info@ya.ru",

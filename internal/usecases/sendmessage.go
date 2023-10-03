@@ -27,11 +27,15 @@ type sendMessageUsacases struct {
 }
 
 var (
+	// ErrChatsNotFound is returned when chats are not found.
 	ErrChatsNotFound = errors.New("chats not found")
+	// ErrChatsNotAllow is returned when chats are not allowed.
 	ErrChatsNotAllow = errors.New("chats not allowed")
+	// ErrCanNotSend is returned when a message cannot be sent.
 	ErrCanNotSend    = errors.New("can not send message")
 )
 
+// NewSendMessageUsecases creates a new instance of sendMessageUsacases with the provided dependencies.
 func NewSendMessageUsecases(logger *slog.Logger, cg chatGeter, bs botSender) *sendMessageUsacases {
 	return &sendMessageUsacases{
 		logger: logger,
@@ -40,6 +44,9 @@ func NewSendMessageUsecases(logger *slog.Logger, cg chatGeter, bs botSender) *se
 	}
 }
 
+// SendMessage sends a message to the specified chats. If no chat IDs are provided, the message is sent to all chats associated with the company token.
+// If chat IDs are provided, the message is only sent to the chats that are associated with the company token and have a matching chat ID.
+// Returns an error if the chats are not found, not allowed, or if the message cannot be sent.
 func (u *sendMessageUsacases) SendMessage(ctx context.Context, msg entities.Message) error {
 	const op = "usecases.SendMessage"
 	logger := u.logger.With(slog.String("operation", op))
@@ -56,7 +63,7 @@ func (u *sendMessageUsacases) SendMessage(ctx context.Context, msg entities.Mess
 
 	if len(msg.ChatIds) == 0 {
 		for _, c := range chats {
-			msg.ChatIds = append(msg.ChatIds, c.TelegramId)
+			msg.ChatIds = append(msg.ChatIds, c.TelegramID)
 		}
 		err := u.bs.SendMessage(ctx, msg)
 		if err != nil {
@@ -70,8 +77,8 @@ func (u *sendMessageUsacases) SendMessage(ctx context.Context, msg entities.Mess
 	allowedChats := make([]int64, 0, len(msg.ChatIds))
 	for _, chat := range msg.ChatIds {
 		for _, c := range chats {
-			if c.TelegramId == chat {
-				allowedChats = append(allowedChats, c.TelegramId)
+			if c.TelegramID == chat {
+				allowedChats = append(allowedChats, c.TelegramID)
 			}
 		}
 	}
