@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	parseMode = []string{"markdownv2", "markdown", "html"}
+	parseMode = []string{"html"} //"markdownv2", "markdown",
 )
 
 func ValidateParseMode(fl validator.FieldLevel) bool {
