@@ -35,7 +35,7 @@ func TestNew(t *testing.T) {
 			name:      "Success",
 			token:     "token",
 			message:   "test message",
-			parseMode: "MarkdownV2",
+			parseMode: "HTML",
 			chatIds:   []int64{12345},
 			respCode:  http.StatusOK,
 			respError: "message sent",
@@ -44,7 +44,7 @@ func TestNew(t *testing.T) {
 		{
 			name:      "unauthorized",
 			message:   "test message",
-			parseMode: "MarkdownV2",
+			parseMode: "HTML",
 			chatIds:   []int64{12345},
 			respCode:  http.StatusUnauthorized,
 			respError: "token is required",
@@ -54,7 +54,7 @@ func TestNew(t *testing.T) {
 			name:      "invalid request",
 			token:     "token",
 			message:   "test message",
-			parseMode: "MarkdownV2",
+			parseMode: "HTML",
 			chatIds:   []int64{},
 			body:      `{"message":"test message","parseMode":"MarkdownV2","chatIds":["123"]}`,
 			respCode:  http.StatusBadRequest,
@@ -107,6 +107,7 @@ func TestNew(t *testing.T) {
 			mockTimes: 1,
 			mockError: errors.New("some error"),
 		},
+
 	}
 	for _, tc := range tests {
 		tc := tc

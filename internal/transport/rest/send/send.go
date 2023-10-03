@@ -48,14 +48,8 @@ func New(log *slog.Logger, sender sender) http.HandlerFunc {
 		log.Debug("request body decoded", slog.Any("request", req))
 
 		v := validator.New()
-		err = v.RegisterValidation("parse-mode", val.ValidateParseMode)
-		if err != nil {
-			log.Error("failed to register validation", sl.Err(err))
-
-			handlers.NewErrorResponse(w, http.StatusInternalServerError, "failed to register validation")
-			return
-		}
-
+		// nolint:errcheck
+		v.RegisterValidation("parse-mode", val.ValidateParseMode)
 		if err := v.Struct(req); err != nil {
 			validateErr := err.(validator.ValidationErrors)
 			log.Error("invalid request", sl.Err(err))
@@ -69,7 +63,6 @@ func New(log *slog.Logger, sender sender) http.HandlerFunc {
 		message.Token = token
 
 		log.Debug("request convert to message", slog.Any("message", message))
-
 		err = sender.SendMessage(r.Context(), message)
 		if err != nil {
 			log.Error("can not send message", sl.Err(err))
@@ -79,9 +72,7 @@ func New(log *slog.Logger, sender sender) http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		_, err = w.Write([]byte("message sent"))
-		if err != nil {
-			log.Error("failed to write response", sl.Err(err))
-		}
+		// nolint:errcheck
+		w.Write([]byte("message sent"))
 	}
 }
