@@ -145,7 +145,7 @@ func (b *TelegramBot) sendMessage(m tgbotapi.MessageConfig) {
 	const op = "telegram.sendMessage"
 
 	if _, err := b.bot.Send(m); err != nil {
-		b.logger.Error("cannot send message", sl.Err(err), slog.String("op", op))
+		b.logger.Error("cannot send message", sl.Err(err), slog.String("op", op), slog.Int64("chatID", m.ChatID), slog.String("text", m.Text))
 	}
 }
 
