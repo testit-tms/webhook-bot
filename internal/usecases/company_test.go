@@ -31,8 +31,8 @@ func Test_companyUsecases_GetCompanyByOwnerId(t *testing.T) {
 			name:    "success",
 			ownerId: 1,
 			want: entities.CompanyInfo{
-				Id:      12,
-				OwnerId: 21,
+				ID:      12,
+				OwnerID: 21,
 				Token:   "token",
 				Name:    "Yandex",
 				Email:   "info@ya.ru",
@@ -41,8 +41,8 @@ func Test_companyUsecases_GetCompanyByOwnerId(t *testing.T) {
 				},
 			},
 			mockCompEntities: entities.Company{
-				Id:      12,
-				OwnerId: 21,
+				ID:      12,
+				OwnerID: 21,
 				Token:   "token",
 				Name:    "Yandex",
 				Email:   "info@ya.ru",
@@ -52,8 +52,8 @@ func Test_companyUsecases_GetCompanyByOwnerId(t *testing.T) {
 			mockChatEntities: []entities.Chat{
 				{
 					Id:         1,
-					CompanyId:  12,
-					TelegramId: 123,
+					CompanyID:  12,
+					TelegramID: 123,
 				},
 			},
 			mockChatError: nil,
@@ -86,16 +86,16 @@ func Test_companyUsecases_GetCompanyByOwnerId(t *testing.T) {
 			name:    "chats with ErrNotFound",
 			ownerId: 1,
 			want: entities.CompanyInfo{
-				Id:      12,
-				OwnerId: 21,
+				ID:      12,
+				OwnerID: 21,
 				Token:   "token",
 				Name:    "Yandex",
 				Email:   "info@ya.ru",
 				ChatIds: nil,
 			},
 			mockCompEntities: entities.Company{
-				Id:      12,
-				OwnerId: 21,
+				ID:      12,
+				OwnerID: 21,
 				Token:   "token",
 				Name:    "Yandex",
 				Email:   "info@ya.ru",
@@ -111,16 +111,16 @@ func Test_companyUsecases_GetCompanyByOwnerId(t *testing.T) {
 			name:    "chats with other error",
 			ownerId: 1,
 			want: entities.CompanyInfo{
-				Id:      12,
-				OwnerId: 21,
+				ID:      12,
+				OwnerID: 21,
 				Token:   "token",
 				Name:    "Yandex",
 				Email:   "info@ya.ru",
 				ChatIds: nil,
 			},
 			mockCompEntities: entities.Company{
-				Id:      12,
-				OwnerId: 21,
+				ID:      12,
+				OwnerID: 21,
 				Token:   "token",
 				Name:    "Yandex",
 				Email:   "info@ya.ru",
@@ -142,7 +142,7 @@ func Test_companyUsecases_GetCompanyByOwnerId(t *testing.T) {
 
 			chatMock := mocks.NewMockchatStorage(mockCtrl)
 			if tt.mockChatTimes != 0 {
-				chatMock.EXPECT().GetChatsByCompanyId(gomock.Any(), tt.mockCompEntities.Id).Return(tt.mockChatEntities, tt.mockChatError).Times(tt.mockChatTimes)
+				chatMock.EXPECT().GetChatsByCompanyId(gomock.Any(), tt.mockCompEntities.ID).Return(tt.mockChatEntities, tt.mockChatError).Times(tt.mockChatTimes)
 			}
 
 			u := NewCompanyUsecases(companyMock, chatMock)

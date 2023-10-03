@@ -21,15 +21,19 @@ type companyStorage interface {
 }
 
 var (
+	// ErrCompanyAlreadyExists is returned when a company already exists.
 	ErrCompanyAlreadyExists = fmt.Errorf("company already exists")
 )
 
 // TODO: move to usesases package and write tests
+
+// RegistrationUsecases is a usecase implementation for registration.
 type RegistrationUsecases struct {
 	os ownerStorage
 	cs companyStorage
 }
 
+// New creates a new instance of RegistrationUsecases.
 func New(os ownerStorage, cs companyStorage) *RegistrationUsecases {
 	return &RegistrationUsecases{
 		os: os,
@@ -38,6 +42,8 @@ func New(os ownerStorage, cs companyStorage) *RegistrationUsecases {
 }
 
 // TODO: move to usesases package and write tests
+
+// CheckCompanyExists checks if a company exists for the given owner ID.
 func (r *RegistrationUsecases) CheckCompanyExists(ctx context.Context, ownerId int64) (bool, error) {
 	const op = "RegistrationUsecases.CheckCompanyExists"
 
@@ -54,17 +60,19 @@ func (r *RegistrationUsecases) CheckCompanyExists(ctx context.Context, ownerId i
 }
 
 // TODO: add transaction and tests
+
+// RegisterCompany registers a new company with the given registration information.
 func (r *RegistrationUsecases) RegisterCompany(ctx context.Context, c entities.CompanyRegistrationInfo) error {
 	const op = "RegistrationUsecases.RegisterCompany"
 
-	owner, err := r.os.GetOwnerByTelegramId(ctx, c.Owner.TelegramId)
+	owner, err := r.os.GetOwnerByTelegramId(ctx, c.Owner.TelegramID)
 	if err != nil {
 		if err != storage.ErrNotFound {
 			return fmt.Errorf("%s: cannot get owner by telegram id: %w", op, err)
 		}
 
 		newOwner := entities.Owner{
-			TelegramId:   c.Owner.TelegramId,
+			TelegramID:   c.Owner.TelegramID,
 			TelegramName: c.Owner.TelegramName,
 		}
 
@@ -74,13 +82,13 @@ func (r *RegistrationUsecases) RegisterCompany(ctx context.Context, c entities.C
 		}
 	}
 
-	_, err = r.cs.GetCompanyByOwnerTelegramId(ctx, c.Owner.TelegramId)
+	_, err = r.cs.GetCompanyByOwnerTelegramId(ctx, c.Owner.TelegramID)
 	if err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
 			company := entities.Company{
 				Name:    c.Name,
 				Email:   c.Email,
-				OwnerId: owner.Id,
+				OwnerID: owner.ID,
 				Token:   random.NewRandomString(30),
 			}
 

@@ -1,3 +1,15 @@
 linters:
   enable:
-    - goimports
+    - revive
+
+linters-settings:
+  revive:
+    rules:
+      - name: exported
+        arguments:
+          - disableStutteringCheck
+
+issues:
+  include:
+    - EXC0012 
+    - EXC0014 

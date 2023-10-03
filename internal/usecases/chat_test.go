@@ -25,13 +25,13 @@ func Test_chatUsecases_AddChat(t *testing.T) {
 		{
 			name: "success",
 			chat: entities.Chat{
-				CompanyId:  12,
-				TelegramId: 123,
+				CompanyID:  12,
+				TelegramID: 123,
 			},
 			want: entities.Chat{
 				Id:         1,
-				CompanyId:  12,
-				TelegramId: 123,
+				CompanyID:  12,
+				TelegramID: 123,
 			},
 			wantErr:        false,
 			wantErrMessage: "",
@@ -40,8 +40,8 @@ func Test_chatUsecases_AddChat(t *testing.T) {
 		{
 			name: "error",
 			chat: entities.Chat{
-				CompanyId:  12,
-				TelegramId: 123,
+				CompanyID:  12,
+				TelegramID: 123,
 			},
 			want:           entities.Chat{},
 			wantErr:        true,
@@ -96,15 +96,15 @@ func Test_chatUsecases_DeleteChatByTelegramId(t *testing.T) {
 			ownerId: 1,
 			chatId:  123,
 			mockCompEntities: entities.Company{
-				Id: 12,
+				ID: 12,
 			},
 			mockCompError: nil,
 			mockCompTimes: 1,
 			mockGetChatEntities: []entities.Chat{
 				{
 					Id:         1,
-					CompanyId:  12,
-					TelegramId: 123,
+					CompanyID:  12,
+					TelegramID: 123,
 				},
 			},
 			mockGetChatError:    nil,
@@ -129,15 +129,15 @@ func Test_chatUsecases_DeleteChatByTelegramId(t *testing.T) {
 			ownerId: 1,
 			chatId:  123,
 			mockCompEntities: entities.Company{
-				Id: 12,
+				ID: 12,
 			},
 			mockCompError: nil,
 			mockCompTimes: 1,
 			mockGetChatEntities: []entities.Chat{
 				{
 					Id:         1,
-					CompanyId:  12,
-					TelegramId: 321,
+					CompanyID:  12,
+					TelegramID: 321,
 				},
 			},
 			mockGetChatError:    nil,
@@ -152,7 +152,7 @@ func Test_chatUsecases_DeleteChatByTelegramId(t *testing.T) {
 			ownerId: 1,
 			chatId:  123,
 			mockCompEntities: entities.Company{
-				Id: 12,
+				ID: 12,
 			},
 			mockCompError:       nil,
 			mockCompTimes:       1,
@@ -169,15 +169,15 @@ func Test_chatUsecases_DeleteChatByTelegramId(t *testing.T) {
 			ownerId: 1,
 			chatId:  123,
 			mockCompEntities: entities.Company{
-				Id: 12,
+				ID: 12,
 			},
 			mockCompError: nil,
 			mockCompTimes: 1,
 			mockGetChatEntities: []entities.Chat{
 				{
 					Id:         1,
-					CompanyId:  12,
-					TelegramId: 123,
+					CompanyID:  12,
+					TelegramID: 123,
 				},
 			},
 			mockGetChatError:    nil,
@@ -197,7 +197,7 @@ func Test_chatUsecases_DeleteChatByTelegramId(t *testing.T) {
 
 			chatMock := mocks.NewMockchatsStorage(mockCtrl)
 			if tt.mockGetChatTimes != 0 {
-				chatMock.EXPECT().GetChatsByCompanyId(gomock.Any(), tt.mockCompEntities.Id).Return(tt.mockGetChatEntities, tt.mockGetChatError).Times(tt.mockGetChatTimes)
+				chatMock.EXPECT().GetChatsByCompanyId(gomock.Any(), tt.mockCompEntities.ID).Return(tt.mockGetChatEntities, tt.mockGetChatError).Times(tt.mockGetChatTimes)
 			}
 
 			if tt.mockDeleteChatTimes != 0 {

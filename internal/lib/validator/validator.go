@@ -10,6 +10,8 @@ var (
 	parseMode = []string{"html"} //"markdownv2", "markdown",
 )
 
+// ValidateParseMode checks if the provided parse mode is valid.
+// Returns true if the parse mode is valid, false otherwise.
 func ValidateParseMode(fl validator.FieldLevel) bool {
 	value := fl.Field().String()
 

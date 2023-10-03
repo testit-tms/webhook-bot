@@ -36,6 +36,7 @@ type chatCommands interface {
 	DeleteChat(m *tgbotapi.Message) (tgbotapi.MessageConfig, error)
 }
 
+// TelegramBot represents a Telegram bot instance
 type TelegramBot struct {
 	logger           *slog.Logger
 	bot              *tgbotapi.BotAPI
@@ -155,6 +156,7 @@ func (b *TelegramBot) sendMessage(m tgbotapi.MessageConfig) {
 	}
 }
 
+// SendMessage sends a message to the specified chat IDs using the Telegram bot API.
 func (b *TelegramBot) SendMessage(ctx context.Context, msg entities.Message) error {
 	const op = "telegram.SendMessage"
 	for _, chatID := range msg.ChatIds {

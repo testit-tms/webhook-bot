@@ -19,6 +19,10 @@ type sender interface {
 	SendMessage(ctx context.Context, msg entities.Message) error
 }
 
+// New returns a new http.HandlerFunc that sends a message using the provided sender.
+// It validates the request, converts it to a message, and sends it using the sender.
+// If any error occurs during the process, it returns an error response.
+// It requires an Authorization token in the request header.
 func New(log *slog.Logger, sender sender) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "transport.rest.send.New"

@@ -11,10 +11,12 @@ import (
 	"github.com/testit-tms/webhook-bot/internal/storage"
 )
 
+// OwnerStorage represents a PostgreSQL implementation of the storage for owners.
 type OwnerStorage struct {
 	db *sqlx.DB
 }
 
+// New creates a new instance of OwnerStorage with the given database connection.
 func New(db *sqlx.DB) *OwnerStorage {
 	return &OwnerStorage{
 		db: db,
@@ -28,6 +30,7 @@ const (
 	deleteOwnerById      = "DELETE FROM owners WHERE id=$1"
 )
 
+// GetOwnerById retrieves an owner by their ID.
 func (s *OwnerStorage) GetOwnerById(ctx context.Context, id int64) (entities.Owner, error) {
 	const op = "storage.postgres.GetOwnerById"
 
@@ -44,6 +47,7 @@ func (s *OwnerStorage) GetOwnerById(ctx context.Context, id int64) (entities.Own
 	return owner, nil
 }
 
+// GetOwnerByTelegramId retrieves an owner by their Telegram ID.
 func (s *OwnerStorage) GetOwnerByTelegramId(ctx context.Context, id int64) (entities.Owner, error) {
 	const op = "storage.postgres.GetOwnerByTelegramId"
 
@@ -60,12 +64,13 @@ func (s *OwnerStorage) GetOwnerByTelegramId(ctx context.Context, id int64) (enti
 	return owner, nil
 }
 
+// AddOwner adds a new owner to the database and returns the newly created owner.
 func (r *OwnerStorage) AddOwner(ctx context.Context, owner entities.Owner) (entities.Owner, error) {
 	const op = "storage.postgres.AddOwner"
 
 	newOwner := entities.Owner{}
 
-	err := r.db.QueryRowxContext(ctx, addOwner, owner.TelegramId, owner.TelegramName).StructScan(&newOwner)
+	err := r.db.QueryRowxContext(ctx, addOwner, owner.TelegramID, owner.TelegramName).StructScan(&newOwner)
 	if err != nil {
 		return newOwner, fmt.Errorf("%s: execute query: %w", op, err)
 	}
@@ -73,7 +78,8 @@ func (r *OwnerStorage) AddOwner(ctx context.Context, owner entities.Owner) (enti
 	return newOwner, nil
 }
 
-func (r *OwnerStorage) DeleteOwnerById(ctx context.Context, id int64) error {
+// DeleteOwnerByID deletes an owner by their ID.
+func (r *OwnerStorage) DeleteOwnerByID(ctx context.Context, id int64) error {
 	const op = "storage.postgres.DeleteOwnerById"
 
 	_, err := r.db.ExecContext(ctx, deleteOwnerById, id)

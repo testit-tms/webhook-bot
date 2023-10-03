@@ -46,13 +46,13 @@ func (u *chatUsecases) DeleteChatByTelegramId(ctx context.Context, ownerId, chat
 		return fmt.Errorf("%s: get company by owner id: %w", op, err)
 	}
 
-	chats, err := u.cs.GetChatsByCompanyId(ctx, company.Id)
+	chats, err := u.cs.GetChatsByCompanyId(ctx, company.ID)
 	if err != nil {
 		return fmt.Errorf("%s: get chats by company id: %w", op, err)
 	}
 
 	for _, chat := range chats {
-		if chat.TelegramId == chatId {
+		if chat.TelegramID == chatId {
 			if err := u.cs.DeleteChatById(ctx, chat.Id); err != nil {
 				return fmt.Errorf("%s: delete chat by id: %w", op, err)
 			}

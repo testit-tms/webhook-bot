@@ -20,12 +20,16 @@ type regUsecase interface {
 }
 
 // TODO: move to companyCommands
+
+// Registrator represents a struct that is responsible for handling the registration process for new companies.
 type Registrator struct {
 	logger  *slog.Logger
 	waitMap map[int64]models.Company
 	u       regUsecase
 }
 
+// NewRegistrator creates a new instance of the Registrator struct, which is responsible for handling the registration process for new companies.
+// It takes a logger instance and a regUsecase instance as arguments, and returns a pointer to the new Registrator instance.
 func NewRegistrator(logger *slog.Logger, u regUsecase) *Registrator {
 	return &Registrator{
 		logger:  logger,
@@ -54,6 +58,8 @@ func (r *Registrator) registerEmail(chatID int64, email string) {
 	}
 }
 
+// Action performs the registration process for a user and returns the next step to be taken.
+// It takes a message and a step number as input and returns a message configuration and the next step number.
 func (r *Registrator) Action(m *tgbotapi.Message, step int) (tgbotapi.MessageConfig, int) {
 	const op = "Registrator.Action"
 	logger := r.logger.With(
@@ -97,6 +103,7 @@ func (r *Registrator) Action(m *tgbotapi.Message, step int) (tgbotapi.MessageCon
 	}
 }
 
+// GetFirstMessage returns the first message to be sent to a user during the registration process.
 func (r *Registrator) GetFirstMessage(m *tgbotapi.Message) tgbotapi.MessageConfig {
 	e, err := r.u.CheckCompanyExists(context.Background(), m.From.ID)
 	if err != nil {

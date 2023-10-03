@@ -16,6 +16,7 @@ const (
 	driverName = "postgres"
 )
 
+// Initialize a new connection to a PostgreSQL database and runs any pending migrations.
 func Initialize(host string, port int64, user, password, dbname string) (*sqlx.DB, error) {
 	const op = "database.Initialize"
 	db, err := sqlx.Connect(driverName, fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",

@@ -1,7 +1,8 @@
 package entities
 
+// Chat represents a chat entity.
 type Chat struct {
 	Id         int64 `db:"id"`
-	CompanyId  int64 `db:"company_id"`
-	TelegramId int64 `db:"telegram_id"`
+	CompanyID  int64 `db:"company_id"`
+	TelegramID int64 `db:"telegram_id"`
 }

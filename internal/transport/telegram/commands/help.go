@@ -4,6 +4,9 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+// GetHelpMessage returns a Telegram message configuration containing a list of available commands.
+// The message includes the command names and their descriptions.
+// The message is sent to the chat ID specified in the input message.
 func GetHelpMessage(m *tgbotapi.Message) tgbotapi.MessageConfig {
 	return tgbotapi.NewMessage(m.Chat.ID,
 		`Available commands:

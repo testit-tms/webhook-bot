@@ -11,10 +11,12 @@ import (
 	"github.com/testit-tms/webhook-bot/internal/storage"
 )
 
+// ChatStorage is a storage implementation for chats using PostgreSQL.
 type ChatStorage struct {
 	db *sqlx.DB
 }
 
+// New returns a new instance of ChatStorage with the given database connection.
 func New(db *sqlx.DB) *ChatStorage {
 	return &ChatStorage{
 		db: db,
@@ -29,6 +31,7 @@ const (
 	deleteChatByCompanyId  = "DELETE FROM chats WHERE company_id=$1"
 )
 
+// GetChatsByCompanyId returns a slice of entities.Chat that belong to the company with the given ID.
 func (s *ChatStorage) GetChatsByCompanyId(ctx context.Context, id int64) ([]entities.Chat, error) {
 	const op = "storage.postgres.GetChatByCompanyId"
 
@@ -45,6 +48,7 @@ func (s *ChatStorage) GetChatsByCompanyId(ctx context.Context, id int64) ([]enti
 	return chats, nil
 }
 
+// GetChatsByCompanyToken returns a slice of entities.Chat that belong to the company with the given token.
 func (s *ChatStorage) GetChatsByCompanyToken(ctx context.Context, t string) ([]entities.Chat, error) {
 	const op = "storage.postgres.GetChatsByCompanyToken"
 
@@ -61,12 +65,13 @@ func (s *ChatStorage) GetChatsByCompanyToken(ctx context.Context, t string) ([]e
 	return chats, nil
 }
 
+// AddChat adds a new chat to the database and returns the newly created chat entity.
 func (r *ChatStorage) AddChat(ctx context.Context, chat entities.Chat) (entities.Chat, error) {
 	const op = "storage.postgres.AddChat"
 
 	newChat := entities.Chat{}
 
-	err := r.db.QueryRowxContext(ctx, addChat, chat.CompanyId, chat.TelegramId).StructScan(&newChat)
+	err := r.db.QueryRowxContext(ctx, addChat, chat.CompanyID, chat.TelegramID).StructScan(&newChat)
 	if err != nil {
 		return newChat, fmt.Errorf("%s: execute query: %w", op, err)
 	}
@@ -74,6 +79,7 @@ func (r *ChatStorage) AddChat(ctx context.Context, chat entities.Chat) (entities
 	return newChat, nil
 }
 
+// DeleteChatById deletes a chat from the database by its ID.
 func (r *ChatStorage) DeleteChatById(ctx context.Context, id int64) error {
 	const op = "storage.postgres.DeleteChatById"
 
@@ -85,6 +91,7 @@ func (r *ChatStorage) DeleteChatById(ctx context.Context, id int64) error {
 	return nil
 }
 
+// DeleteChatByCompanyId deletes all chats from the database that belong to the company with the given ID.
 func (r *ChatStorage) DeleteChatByCompanyId(ctx context.Context, id int) error {
 	const op = "storage.postgres.DeleteChatByCompanyId"
 

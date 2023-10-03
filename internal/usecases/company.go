@@ -25,9 +25,11 @@ type companyUsecases struct {
 }
 
 var (
+	// ErrCompanyNotFound is returned when a company is not found.
 	ErrCompanyNotFound = errors.New("company not found")
 )
 
+// NewCompanyUsecases creates a new instance of companyUsecases.
 func NewCompanyUsecases(cs companyStorage, chs chatStorage) *companyUsecases {
 	return &companyUsecases{
 		cs:  cs,
@@ -35,6 +37,8 @@ func NewCompanyUsecases(cs companyStorage, chs chatStorage) *companyUsecases {
 	}
 }
 
+// GetCompanyByOwnerTelegramId retrieves the company information associated with the given owner Telegram ID.
+// It returns a CompanyInfo struct and an error. If the company is not found, it returns ErrCompanyNotFound.
 func (u *companyUsecases) GetCompanyByOwnerTelegramId(ctx context.Context, ownerId int64) (entities.CompanyInfo, error) {
 	const op = "usecases.GetCompanyByOwnerTelegramId"
 
@@ -47,14 +51,14 @@ func (u *companyUsecases) GetCompanyByOwnerTelegramId(ctx context.Context, owner
 	}
 
 	ci := entities.CompanyInfo{
-		Id:      company.Id,
-		OwnerId: company.OwnerId,
+		ID:      company.ID,
+		OwnerID: company.OwnerID,
 		Token:   company.Token,
 		Name:    company.Name,
 		Email:   company.Email,
 	}
 
-	chats, err := u.chs.GetChatsByCompanyId(ctx, company.Id)
+	chats, err := u.chs.GetChatsByCompanyId(ctx, company.ID)
 	if err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
 			return ci, nil
@@ -63,7 +67,7 @@ func (u *companyUsecases) GetCompanyByOwnerTelegramId(ctx context.Context, owner
 	}
 
 	for _, chat := range chats {
-		ci.ChatIds = append(ci.ChatIds, chat.TelegramId)
+		ci.ChatIds = append(ci.ChatIds, chat.TelegramID)
 	}
 
 	return ci, nil
