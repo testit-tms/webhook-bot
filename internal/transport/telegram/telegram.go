@@ -96,6 +96,12 @@ func (b *TelegramBot) Run() {
 
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 
+		b.logger.Debug("got command",
+			slog.String("command", update.Message.Command()),
+			slog.String("text", update.Message.Text),
+			slog.Int64("chatID", update.Message.Chat.ID),
+		)
+
 		// Extract the command from the Message.
 		switch update.Message.Command() {
 		case helpCommand:
