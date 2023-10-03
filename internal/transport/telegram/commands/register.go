@@ -107,7 +107,7 @@ func (r *Registrator) GetFirstMessage(m *tgbotapi.Message) tgbotapi.MessageConfi
 	if e {
 		return tgbotapi.NewMessage(m.Chat.ID, "You already have company")
 	}
-	
+
 	msg := tgbotapi.NewMessage(m.Chat.ID, "Enter company name:")
 	msg.ReplyMarkup = tgbotapi.ForceReply{ForceReply: true, Selective: true}
 	return msg

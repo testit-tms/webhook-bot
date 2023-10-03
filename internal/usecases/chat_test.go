@@ -165,7 +165,7 @@ func Test_chatUsecases_DeleteChatByTelegramId(t *testing.T) {
 			wantErrMessage:      "usecases.DeleteChatByTelegramId: get chats by company id: error",
 		},
 		{
-			name:    "delete chat error",	
+			name:    "delete chat error",
 			ownerId: 1,
 			chatId:  123,
 			mockCompEntities: entities.Company{
@@ -187,8 +187,6 @@ func Test_chatUsecases_DeleteChatByTelegramId(t *testing.T) {
 			wantErr:             true,
 			wantErrMessage:      "usecases.DeleteChatByTelegramId: delete chat by id: error",
 		},
-		
-
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

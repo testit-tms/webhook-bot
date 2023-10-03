@@ -107,7 +107,6 @@ func TestNew(t *testing.T) {
 			mockTimes: 1,
 			mockError: errors.New("some error"),
 		},
-
 	}
 	for _, tc := range tests {
 		tc := tc

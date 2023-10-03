@@ -222,7 +222,7 @@ func TestOwnerStorage_DeleteOwnerById(t *testing.T) {
 		t.Parallel()
 		f := database.NewFixture(t)
 		defer f.Teardown()
-		
+
 		var id int64 = 12
 
 		f.Mock.ExpectExec(regexp.QuoteMeta("DELETE FROM owners WHERE id=$1")).
