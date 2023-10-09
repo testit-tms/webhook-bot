@@ -25,7 +25,7 @@ services:
       IDLE_TIMEOUT: "${IDLE_TIMEOUT:-60s}"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.wh-bot.rule=Host(`${BOT_URL}`)"
+      - "traefik.http.routers.wh-bot.rule=Host(`${BOT_URL}`) && Path(`/telegram`)"
       - "traefik.http.routers.wh-bot.entrypoints=websecure"
       - "traefik.http.routers.wh-bot.tls.certresolver=myresolver"
       - "traefik.http.services.wh-bot.loadbalancer.server.port=8080"
