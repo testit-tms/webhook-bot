@@ -6,12 +6,14 @@ import (
 	"fmt"
 
 	"github.com/testit-tms/webhook-bot/internal/entities"
+	"github.com/testit-tms/webhook-bot/internal/lib/random"
 	"github.com/testit-tms/webhook-bot/internal/storage"
 )
 
 //go:generate mockgen -source=$GOFILE -destination=$PWD/mocks/${GOFILE} -package=mocks
 type companyStorage interface {
 	GetCompanyByOwnerTelegramId(ctx context.Context, ownerId int64) (entities.Company, error)
+	UpdateToken(ctx context.Context, companyId int64, token string) error
 }
 
 //go:generate mockgen -source=$GOFILE -destination=$PWD/mocks/${GOFILE} -package=mocks
@@ -71,4 +73,26 @@ func (u *companyUsecases) GetCompanyByOwnerTelegramId(ctx context.Context, owner
 	}
 
 	return ci, nil
+}
+
+// UpdateToken updates the company token.
+// It returns an error if the company is not found.
+func (u *companyUsecases) UpdateToken(ctx context.Context, ownerId int64) error {
+	const op = "usecases.UpdateToken"
+
+	company, err := u.cs.GetCompanyByOwnerTelegramId(ctx, ownerId)
+	if err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			return fmt.Errorf("%s: %w", op, ErrCompanyNotFound)
+		}
+		return fmt.Errorf("%s: get company by owner id: %w", op, err)
+	}
+
+	token := random.NewRandomString(30)
+	
+	if err := u.cs.UpdateToken(ctx, company.ID, token); err != nil {
+		return fmt.Errorf("%s: update token: %w", op, err)
+	}
+
+	return nil
 }
