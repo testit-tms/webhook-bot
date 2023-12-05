@@ -148,3 +148,72 @@ func TestCompanyStorage_GetCompanyByOwnerTelegramId(t *testing.T) {
 		assert.Equal(t, entities.Company{}, company)
 	})
 }
+
+func TestCompanyStorage_UpdateToken(t *testing.T) {
+	t.Run("with company", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		var companyID int64 = 12
+		var token = "bguFFFTF&32r23r23t"
+
+		f.Mock.ExpectExec(regexp.QuoteMeta("UPDATE companies SET token=$1 WHERE id=$2")).
+			WithArgs(token, companyID).
+			WillReturnResult(sqlmock.NewResult(1, 1))
+
+		repo := New(f.DB)
+
+		// Act
+		err := repo.UpdateToken(context.Background(), companyID, token)
+
+		// Assert
+		assert.NoError(t, err)
+	})
+
+	t.Run("without company", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		var companyID int64 = 12
+		var token = "bguFFFTF&32r23r23t"
+
+		f.Mock.ExpectExec(regexp.QuoteMeta("UPDATE companies SET token=$1 WHERE id=$2")).
+			WithArgs(token, companyID).
+			WillReturnResult(sqlmock.NewResult(0, 0))
+
+		repo := New(f.DB)
+
+		// Act
+		err := repo.UpdateToken(context.Background(), companyID, token)
+
+		// Assert
+		assert.NoError(t, err)
+	})
+
+	t.Run("with error", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		expectErr := errors.New("test error")
+
+		var companyID int64 = 12
+		var token = "bguFFFTF&32r23r23t"
+
+		f.Mock.ExpectExec(regexp.QuoteMeta("UPDATE companies SET token=$1 WHERE id=$2")).
+			WithArgs(token, companyID).
+			WillReturnError(expectErr)
+		repo := New(f.DB)
+
+		// Act
+		err := repo.UpdateToken(context.Background(), companyID, token)
+
+		// Assert
+		assert.ErrorIs(t, err, expectErr)
+	})
+}

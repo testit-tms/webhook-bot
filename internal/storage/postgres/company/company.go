@@ -27,6 +27,7 @@ const (
 	addCompany          = "INSERT INTO companies (token, owner_id, name, email) VALUES ($1, $2, $3, $4) RETURNING id, token, owner_id, name, email"
 	getCompanyByOwnerId = "SELECT c.id, c.token, c.owner_id, c.name, c.email FROM companies AS c INNER JOIN owners As o ON o.id = c.owner_id WHERE o.telegram_id=$1"
 	getCompanyIdByName  = "SELECT id FROM companies WHERE name=$1"
+	updateToken         = "UPDATE companies SET token=$1 WHERE id=$2"
 )
 
 // AddCompany adds a new company to the database and returns the newly created company.
@@ -60,4 +61,16 @@ func (s *CompanyStorage) GetCompanyByOwnerTelegramId(ctx context.Context, ownerI
 	}
 
 	return company, nil
+}
+
+// UpdateToken updates the company's token.
+func (s *CompanyStorage) UpdateToken(ctx context.Context, companyId int64, token string) error {
+	const op = "storage.postgres.UpdateToken"
+
+	_, err := s.db.ExecContext(ctx, updateToken, token, companyId)
+	if err != nil {
+		return fmt.Errorf("%s: execute query: %w", op, err)
+	}
+
+	return nil
 }
