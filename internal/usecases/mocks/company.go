@@ -50,6 +50,20 @@ func (mr *MockcompanyStorageMockRecorder) GetCompanyByOwnerTelegramId(ctx, owner
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCompanyByOwnerTelegramId", reflect.TypeOf((*MockcompanyStorage)(nil).GetCompanyByOwnerTelegramId), ctx, ownerId)
 }
 
+// UpdateToken mocks base method.
+func (m *MockcompanyStorage) UpdateToken(ctx context.Context, companyId int64, token string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateToken", ctx, companyId, token)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateToken indicates an expected call of UpdateToken.
+func (mr *MockcompanyStorageMockRecorder) UpdateToken(ctx, companyId, token interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateToken", reflect.TypeOf((*MockcompanyStorage)(nil).UpdateToken), ctx, companyId, token)
+}
+
 // MockchatStorage is a mock of chatStorage interface.
 type MockchatStorage struct {
 	ctrl     *gomock.Controller

@@ -12,6 +12,7 @@ import (
 
 type companyUsesaces interface {
 	GetCompanyByOwnerTelegramId(ctx context.Context, ownerId int64) (entities.CompanyInfo, error)
+	UpdateToken(ctx context.Context, ownerId int64) error
 }
 
 // CompanyCommands represents a set of commands related to companies.
@@ -65,5 +66,32 @@ func (c *CompanyCommands) GetMyCompanies(m *tgbotapi.Message) (tgbotapi.MessageC
 		}
 	}
 
+	return msg, nil
+}
+
+// UpdateToken updates the token of the company owned by the user who sent the message.
+// If the user does not own any companies, the message will indicate that they have no companies and provide a command to register a new one.
+// If an error occurs while retrieving the company information, an error message will be returned.
+func (c *CompanyCommands) UpdateToken(m *tgbotapi.Message) (tgbotapi.MessageConfig, error) {
+	const op = "CompanyCommands.UpdateToken"
+
+	msg := tgbotapi.NewMessage(m.Chat.ID, "")
+	msg.ParseMode = tgbotapi.ModeHTML
+
+	err := c.cu.UpdateToken(context.Background(), m.From.ID)
+	if err != nil {
+		if errors.Is(err, usecases.ErrCompanyNotFound) {
+			msg.Text = `
+			<b>You have no companies</b>
+	
+			You can register new company with <b>/register</b> command
+			`
+			return msg, nil
+		}
+		msg.Text = "Something went wrong. Lets try again"
+		return msg, fmt.Errorf("%s: update token: %w", op, err)
+	}
+
+	msg.Text = "Token updated successfully"
 	return msg, nil
 }
