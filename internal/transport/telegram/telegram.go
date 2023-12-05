@@ -13,13 +13,14 @@ import (
 )
 
 const (
-	rigesterCommand   = "register"
-	getChatIdCommand  = "getchatid"
-	getCompanyCommand = "getcompany"
-	addChatCommand    = "addchat"
-	helpCommand       = "help"
-	deleteChatCommand = "deletechat"
-	startCommand      = "start"
+	rigesterCommand    = "register"
+	getChatIdCommand   = "getchatid"
+	getCompanyCommand  = "getcompany"
+	addChatCommand     = "addchat"
+	helpCommand        = "help"
+	deleteChatCommand  = "deletechat"
+	startCommand       = "start"
+	updateTokenCommand = "updatetoken"
 )
 
 type registrator interface {
@@ -29,6 +30,7 @@ type registrator interface {
 
 type companyCommands interface {
 	GetMyCompanies(m *tgbotapi.Message) (tgbotapi.MessageConfig, error)
+	UpdateToken(m *tgbotapi.Message) (tgbotapi.MessageConfig, error)
 }
 
 type chatCommands interface {
@@ -121,6 +123,14 @@ func (b *TelegramBot) Run() {
 			msg, err := b.cc.GetMyCompanies(update.Message)
 			if err != nil {
 				b.logger.Error("cannot get company", sl.Err(err))
+			}
+			b.sendMessage(msg)
+			continue
+
+		case updateTokenCommand:
+			msg, err := b.cc.UpdateToken(update.Message)
+			if err != nil {
+				b.logger.Error("cannot update token", sl.Err(err))
 			}
 			b.sendMessage(msg)
 			continue
