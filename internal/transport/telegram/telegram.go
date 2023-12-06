@@ -21,6 +21,7 @@ const (
 	deleteChatCommand  = "deletechat"
 	startCommand       = "start"
 	updateTokenCommand = "updatetoken"
+	deleteCompany      = "deletecompany"
 )
 
 type registrator interface {
@@ -31,6 +32,7 @@ type registrator interface {
 type companyCommands interface {
 	GetMyCompanies(m *tgbotapi.Message) (tgbotapi.MessageConfig, error)
 	UpdateToken(m *tgbotapi.Message) (tgbotapi.MessageConfig, error)
+	DeleteCompany(m *tgbotapi.Message) (tgbotapi.MessageConfig, error)
 }
 
 type chatCommands interface {
@@ -145,6 +147,13 @@ func (b *TelegramBot) Run() {
 			msg, err := b.chc.DeleteChat(update.Message)
 			if err != nil {
 				b.logger.Error("cannot delete chat", sl.Err(err))
+			}
+			b.sendMessage(msg)
+			continue
+		case deleteCompany:
+			msg, err := b.cc.DeleteCompany(update.Message)
+			if err != nil {
+				b.logger.Error("cannot delete company", sl.Err(err))
 			}
 			b.sendMessage(msg)
 			continue

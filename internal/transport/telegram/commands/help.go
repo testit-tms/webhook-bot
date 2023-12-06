@@ -14,6 +14,7 @@ func GetHelpMessage(m *tgbotapi.Message) tgbotapi.MessageConfig {
 	/getchatid - show chat ID
 	/register - register new company
 	/getcompany - show registered company
+	/deletecompany - delete company
 	/updatetoken - update company token
 	/addchat {chat_id} - add chat to company, for example: /addchat 123456789
 	/deletechat {chat_id} - delete chat from company, for example: /deletechat 123456789

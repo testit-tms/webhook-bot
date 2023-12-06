@@ -217,3 +217,159 @@ func TestCompanyStorage_UpdateToken(t *testing.T) {
 		assert.ErrorIs(t, err, expectErr)
 	})
 }
+
+func TestCompanyStorage_DeleteCompany(t *testing.T) {
+	t.Run("with company", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		var companyID int64 = 12
+
+		f.Mock.ExpectBegin()
+		f.Mock.ExpectExec(regexp.QuoteMeta("DELETE FROM chats WHERE company_id=$1")).
+			WithArgs(companyID).
+			WillReturnResult(sqlmock.NewResult(1, 1))
+		f.Mock.ExpectExec(regexp.QuoteMeta("DELETE FROM companies WHERE id=$1")).
+			WithArgs(companyID).
+			WillReturnResult(sqlmock.NewResult(1, 1))
+		f.Mock.ExpectCommit()
+
+		repo := New(f.DB)
+
+		// Act
+		err := repo.DeleteCompany(context.Background(), companyID)
+
+		// Assert
+		assert.NoError(t, err)
+	})
+
+	t.Run("without company", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		var companyID int64 = 12
+
+		f.Mock.ExpectBegin()
+		f.Mock.ExpectExec(regexp.QuoteMeta("DELETE FROM chats WHERE company_id=$1")).
+			WithArgs(companyID).
+			WillReturnResult(sqlmock.NewResult(0, 0))
+		f.Mock.ExpectExec(regexp.QuoteMeta("DELETE FROM companies WHERE id=$1")).
+			WithArgs(companyID).
+			WillReturnResult(sqlmock.NewResult(0, 0))
+		f.Mock.ExpectCommit()
+
+		repo := New(f.DB)
+
+		// Act
+		err := repo.DeleteCompany(context.Background(), companyID)
+
+		// Assert
+		assert.NoError(t, err)
+	})
+
+	t.Run("with error on delete chats", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		expectErr := errors.New("test error")
+
+		var companyID int64 = 12
+
+		f.Mock.ExpectBegin()
+		f.Mock.ExpectExec(regexp.QuoteMeta("DELETE FROM chats WHERE company_id=$1")).
+			WithArgs(companyID).
+			WillReturnError(expectErr)
+		f.Mock.ExpectRollback()
+
+		repo := New(f.DB)
+
+		// Act
+		err := repo.DeleteCompany(context.Background(), companyID)
+
+		// Assert
+		assert.ErrorIs(t, err, expectErr)
+	})
+
+	t.Run("with error on delete company", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		expectErr := errors.New("test error")
+
+		var companyID int64 = 12
+
+		f.Mock.ExpectBegin()
+		f.Mock.ExpectExec(regexp.QuoteMeta("DELETE FROM chats WHERE company_id=$1")).
+			WithArgs(companyID).
+			WillReturnResult(sqlmock.NewResult(1, 1))
+		f.Mock.ExpectExec(regexp.QuoteMeta("DELETE FROM companies WHERE id=$1")).
+			WithArgs(companyID).
+			WillReturnError(expectErr)
+		f.Mock.ExpectRollback()
+
+		repo := New(f.DB)
+
+		// Act
+		err := repo.DeleteCompany(context.Background(), companyID)
+
+		// Assert
+		assert.ErrorIs(t, err, expectErr)
+	})
+
+	t.Run("with error on transaction create", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		expectErr := errors.New("test error")
+
+		var companyID int64 = 12
+
+		f.Mock.ExpectBegin().
+			WillReturnError(expectErr)
+		f.Mock.ExpectRollback()
+
+		repo := New(f.DB)
+
+		// Act
+		err := repo.DeleteCompany(context.Background(), companyID)
+
+		// Assert
+		assert.ErrorIs(t, err, expectErr)
+	})
+
+	t.Run("with error on transaction rollback", func(t *testing.T) {
+		// Arrange
+		t.Parallel()
+		f := database.NewFixture(t)
+		defer f.Teardown()
+
+		var companyID int64 = 12
+		expectErr := errors.New("test error")
+		rollbackErr := errors.New("rollback error")
+
+		f.Mock.ExpectBegin()
+		f.Mock.ExpectExec(regexp.QuoteMeta("DELETE FROM chats WHERE company_id=$1")).
+			WithArgs(companyID).
+			WillReturnError(expectErr)
+		f.Mock.ExpectRollback().
+			WillReturnError(rollbackErr)
+
+		repo := New(f.DB)
+
+		// Act
+		err := repo.DeleteCompany(context.Background(), companyID)
+
+		// Assert
+		assert.ErrorIs(t, err, rollbackErr)
+	})
+}

@@ -14,6 +14,7 @@ import (
 type companyStorage interface {
 	GetCompanyByOwnerTelegramId(ctx context.Context, ownerId int64) (entities.Company, error)
 	UpdateToken(ctx context.Context, companyId int64, token string) error
+	DeleteCompany(ctx context.Context, companyId int64) error
 }
 
 //go:generate mockgen -source=$GOFILE -destination=$PWD/mocks/${GOFILE} -package=mocks
@@ -92,6 +93,26 @@ func (u *companyUsecases) UpdateToken(ctx context.Context, ownerId int64) error 
 	
 	if err := u.cs.UpdateToken(ctx, company.ID, token); err != nil {
 		return fmt.Errorf("%s: update token: %w", op, err)
+	}
+
+	return nil
+}
+
+// DeleteCompany deletes the company with the given owner Telegram ID.
+// It returns an error if the company is not found.
+func (u *companyUsecases) DeleteCompany(ctx context.Context, ownerId int64) error {
+	const op = "usecases.DeleteCompany"
+
+	company, err := u.cs.GetCompanyByOwnerTelegramId(ctx, ownerId)
+	if err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			return fmt.Errorf("%s: %w", op, ErrCompanyNotFound)
+		}
+		return fmt.Errorf("%s: get company by owner id: %w", op, err)
+	}
+
+	if err := u.cs.DeleteCompany(ctx, company.ID); err != nil {
+		return fmt.Errorf("%s: delete company: %w", op, err)
 	}
 
 	return nil

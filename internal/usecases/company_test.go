@@ -243,3 +243,84 @@ func Test_companyUsecases_UpdateToken(t *testing.T) {
 		})
 	}
 }
+
+func Test_companyUsecases_DeleteCompany(t *testing.T) {
+	tests := []struct {
+		name             string
+		ownerId          int64
+		wantErr          bool
+		mockCompEntities entities.Company
+		mockCompError    error
+		mockCompTimes    int
+		mockDeleteError  error
+		mockDeleteTimes  int
+	}{
+		{
+			name:    "success",
+			ownerId: 1,
+			wantErr: false,
+			mockCompEntities: entities.Company{
+				ID:      12,
+				OwnerID: 21,
+				Token:   "token",
+				Name:    "Yandex",
+				Email:   "",
+			},
+			mockCompError:   nil,
+			mockCompTimes:   1,
+			mockDeleteError: nil,
+			mockDeleteTimes: 1,
+		},
+		{
+			name:             "company with ErrNotFound",
+			ownerId:          1,
+			wantErr:          true,
+			mockCompEntities: entities.Company{},
+			mockCompError:    storage.ErrNotFound,
+			mockCompTimes:    1,
+		},
+		{
+			name:             "company with other error",
+			ownerId:          1,
+			wantErr:          true,
+			mockCompEntities: entities.Company{},
+			mockCompError:    errors.New("test error"),
+			mockCompTimes:    1,
+		},
+		{
+			name:    "delete with error",
+			wantErr: true,
+			mockCompEntities: entities.Company{
+				ID:      12,
+				OwnerID: 21,
+				Token:   "token",
+				Name:    "Yandex",
+				Email:   "",
+			},
+			mockCompError:   nil,
+			mockCompTimes:   1,
+			mockDeleteError: errors.New("test error"),
+			mockDeleteTimes: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockCtrl := gomock.NewController(t)
+			companyMock := mocks.NewMockcompanyStorage(mockCtrl)
+			companyMock.EXPECT().GetCompanyByOwnerTelegramId(gomock.Any(), tt.ownerId).Return(tt.mockCompEntities, tt.mockCompError).Times(tt.mockCompTimes)
+			if tt.mockCompError == nil {
+				companyMock.EXPECT().DeleteCompany(gomock.Any(), tt.mockCompEntities.ID).Return(tt.mockDeleteError).Times(tt.mockDeleteTimes)
+			}
+
+			u := NewCompanyUsecases(companyMock, nil)
+
+			err := u.DeleteCompany(context.Background(), tt.ownerId)
+			if err != nil {
+				if !tt.wantErr {
+					t.Errorf("companyUsecases.DeleteCompany() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+			}
+		})
+	}
+}

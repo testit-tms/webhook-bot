@@ -35,6 +35,20 @@ func (m *MockcompanyStorage) EXPECT() *MockcompanyStorageMockRecorder {
 	return m.recorder
 }
 
+// DeleteCompany mocks base method.
+func (m *MockcompanyStorage) DeleteCompany(ctx context.Context, companyId int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteCompany", ctx, companyId)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteCompany indicates an expected call of DeleteCompany.
+func (mr *MockcompanyStorageMockRecorder) DeleteCompany(ctx, companyId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteCompany", reflect.TypeOf((*MockcompanyStorage)(nil).DeleteCompany), ctx, companyId)
+}
+
 // GetCompanyByOwnerTelegramId mocks base method.
 func (m *MockcompanyStorage) GetCompanyByOwnerTelegramId(ctx context.Context, ownerId int64) (entities.Company, error) {
 	m.ctrl.T.Helper()
