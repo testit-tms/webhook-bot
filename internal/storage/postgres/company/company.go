@@ -24,10 +24,12 @@ func New(db *sqlx.DB) *CompanyStorage {
 }
 
 const (
-	addCompany          = "INSERT INTO companies (token, owner_id, name, email) VALUES ($1, $2, $3, $4) RETURNING id, token, owner_id, name, email"
-	getCompanyByOwnerId = "SELECT c.id, c.token, c.owner_id, c.name, c.email FROM companies AS c INNER JOIN owners As o ON o.id = c.owner_id WHERE o.telegram_id=$1"
-	getCompanyIdByName  = "SELECT id FROM companies WHERE name=$1"
-	updateToken         = "UPDATE companies SET token=$1 WHERE id=$2"
+	addCompany            = "INSERT INTO companies (token, owner_id, name, email) VALUES ($1, $2, $3, $4) RETURNING id, token, owner_id, name, email"
+	getCompanyByOwnerId   = "SELECT c.id, c.token, c.owner_id, c.name, c.email FROM companies AS c INNER JOIN owners As o ON o.id = c.owner_id WHERE o.telegram_id=$1"
+	getCompanyIdByName    = "SELECT id FROM companies WHERE name=$1"
+	updateToken           = "UPDATE companies SET token=$1 WHERE id=$2"
+	deleteCompany         = "DELETE FROM companies WHERE id=$1"
+	deleteChatByCompanyId = "DELETE FROM chats WHERE company_id=$1"
 )
 
 // AddCompany adds a new company to the database and returns the newly created company.
@@ -70,6 +72,37 @@ func (s *CompanyStorage) UpdateToken(ctx context.Context, companyId int64, token
 	_, err := s.db.ExecContext(ctx, updateToken, token, companyId)
 	if err != nil {
 		return fmt.Errorf("%s: execute query: %w", op, err)
+	}
+
+	return nil
+}
+
+// DeleteCompany deletes a company by its ID.
+func (s *CompanyStorage) DeleteCompany(ctx context.Context, companyId int64) (err error) {
+	const op = "storage.postgres.DeleteCompany"
+
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("%s: begin transaction: %w", op, err)
+	}
+	defer func() {
+		if err != nil {
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				err = fmt.Errorf("%s: rollback transaction: %w", op, rollbackErr)
+			}
+		} else {
+			err = tx.Commit()
+		}
+	}()
+
+	_, err = tx.ExecContext(ctx, deleteChatByCompanyId, companyId)
+	if err != nil {
+		return fmt.Errorf("%s: delete chat by company id: %w", op, err)
+	}
+
+	_, err = tx.ExecContext(ctx, deleteCompany, companyId)
+	if err != nil {
+		return fmt.Errorf("%s: delete company: %w", op, err)
 	}
 
 	return nil
